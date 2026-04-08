@@ -1,0 +1,43 @@
+% tex/impl/commands/relations.tex
+\ProvidesFile{relations.tex}[2026/01/17 Relation-theoretic notation]
+
+% ------------------------------------------------------------
+% Praedikate / Begriffe zu Relationen
+% (Argument wird i.d.R. als Kommaliste uebergeben, z.B. {R,A,B})
+% ------------------------------------------------------------
+
+% Totale Relation: TR(R,A,B)
+\providecommand{\TotRel}[1]{\ensuremath{\mathsf{TR}(#1)}}
+
+% (Vorbereitung fuer Ordnungen)
+% Praeordnung: PreOrd(R,A)
+\providecommand{\PreOrd}[1]{\ensuremath{\mathsf{PreOrd}(#1)}}
+
+% Partielle Ordnung: PartOrd(R,A)
+\providecommand{\PartOrd}[1]{\ensuremath{\mathsf{PartOrd}(#1)}}
+
+% Totale Ordnung: TotOrd(R,A)
+\providecommand{\TotOrd}[1]{\ensuremath{\mathsf{TotOrd}(#1)}}
+
+% Strikte Ordnung: StrOrd(R,A)
+\providecommand{\StrOrd}[1]{\ensuremath{\mathsf{StrOrd}(#1)}}
+
+% (optional) Aequivalenzrelation: EqRel(R,A)
+\providecommand{\EqRel}[1]{\ensuremath{\mathsf{EqRel}(#1)}}
+
+% ------------------------------------------------------------
+% commands/relations.tex (falls du die Namen als Makros willst)
+% ------------------------------------------------------------
+\providecommand{\Min}[1]{\ensuremath{\mathsf{Min}(#1)}}
+\providecommand{\Max}[1]{\ensuremath{\mathsf{Max}(#1)}}
+
+\DeclareMathOperator{\LB}{LB}
+\DeclareMathOperator{\UB}{UB}
+
+
+% ------------------------------------------------------------
+% Ordnungs-Prädikate
+% ------------------------------------------------------------
+\DeclareRobustCommand{\WellOrd}[1]{%
+  \ensuremath{\mathrm{WellOrd}\!\bigl(#1\bigr)}%
+}

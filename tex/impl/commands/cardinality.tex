@@ -1,0 +1,20 @@
+% tex/impl/commands/cardinality.tex
+\ProvidesFile{cardinality.tex}[2026/03/25 Cardinality and finiteness notation]
+
+\providecommand{\EqCard}{\mathrel{\approx}}
+
+\DeclareRobustCommand{\Finite}[1]{%
+  \ensuremath{\mathsf{Finite}\!\left(#1\right)}%
+}
+
+\DeclareRobustCommand{\Infinite}[1]{%
+  \ensuremath{\mathsf{Infinite}\!\left(#1\right)}%
+}
+
+\DeclareRobustCommand{\Card}[1]{%
+  \ensuremath{\mathsf{Card}\!\left(#1\right)}%
+}
+
+\DeclareRobustCommand{\tCard}[1]{%
+  \ensuremath{t_{\mathsf{Card}}\!\left(#1\right)}%
+}

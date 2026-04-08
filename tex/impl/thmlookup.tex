@@ -1,0 +1,201 @@
+% tex/impl/thmlookup.tex  (stabiler Stand)
+
+\RequirePackage{xparse}
+\RequirePackage{luacode}
+
+% Lua-Modul laden
+\directlua{
+  if not thmlookup or not thmlookup.ref_by_structure then
+    thmlookup = dofile("tex/impl/thmlookup.lua")
+  end
+}
+
+% ---- Ausgabeformat für Referenzen ----
+\makeatletter
+\providecommand{\ThmLookupPrefix@theorem}{Th.}
+\providecommand{\ThmLookupPrefix@definition}{Def.}
+\providecommand{\ThmLookupPrefix@axiom}{Ax.}
+\providecommand{\ThmLookupPrefix@fallback}{Ref.}
+\makeatother
+
+% \ThmLookupEmitRef{<env>}{<label>} -> "Th. 1.1" (verlinkt via \ref)
+\NewDocumentCommand{\ThmLookupEmitRef}{m m}{%
+  \ifcsname ThmLookupPrefix@#1\endcsname
+    \csname ThmLookupPrefix@#1\endcsname
+  \else
+    \ThmLookupPrefix@fallback
+  \fi
+  ~\ref{#2}%
+}
+
+% \ThmLookupEmitIdRef{<env>}{<label>}
+% Gibt – falls vorhanden – die registrierte Kurz-ID (z.B. ax-mp) als Link aus.
+% Andernfalls Fallback auf die normale Referenz (z.B. Th. 2.1.1).
+\NewDocumentCommand{\ThmLookupEmitIdRef}{m m}{%
+  \directlua{
+    local env   = "\luaescapestring{\detokenize{#1}}"
+    local label = "\luaescapestring{\detokenize{#2}}"
+
+    local best = nil
+    if thmlookup and thmlookup.by_id then
+      for id, r in pairs(thmlookup.by_id) do
+        if r and r.label == label and (env == "" or r.env == env) then
+          if r.self_loaded ~= true then
+            if best == nil or id < best then
+              best = id
+            end
+          end
+        end
+      end
+    end
+
+    if best then
+      tex.sprint("\\hyperref[" .. label .. "]{\\ShowFormulaSource{" .. best .. "}}")
+    else
+      tex.sprint("\\ThmLookupEmitRef{" .. env .. "}{" .. label .. "}")
+    end
+  }%
+}
+
+% \ThmLookupRegister{<label>}{<env>}{<number>}{<statement>}{<title>}
+\NewDocumentCommand{\ThmLookupRegister}{m m m m g}{%
+  \begingroup
+    \def\mxTitle{}%
+    \IfNoValueF{#5}{\def\mxTitle{#5}}%
+
+    % sanft expandieren (z.B. \mxKey), aber keine TeX-Logik in Lua
+    \edef\mxStmt{\unexpanded\expandafter{#4}}%
+    \csname protected@edef\endcsname\mxLabel{#1}%
+    \csname protected@edef\endcsname\mxEnv{#2}%
+    \csname protected@edef\endcsname\mxNum{#3}%
+
+    % INHALT detokenize'n (nicht den Makronamen)
+    \edef\mxLabelStr{\expandafter\detokenize\expandafter{\mxLabel}}%
+    \edef\mxEnvStr  {\expandafter\detokenize\expandafter{\mxEnv}}%
+    \edef\mxNumStr  {\expandafter\detokenize\expandafter{\mxNum}}%
+    \edef\mxStmtStr {\expandafter\detokenize\expandafter{\mxStmt}}%
+    \edef\mxTitleStr{\expandafter\detokenize\expandafter{\mxTitle}}%
+
+    \edef\mxLuaCode{%
+      thmlookup.register(
+        "\luaescapestring{\mxLabelStr}",
+        "\luaescapestring{\mxEnvStr}",
+        "\luaescapestring{\mxNumStr}",
+        "\luaescapestring{\mxStmtStr}",
+        "\luaescapestring{\mxTitleStr}"
+      )%
+    }%
+    \directlua{\mxLuaCode}%
+  \endgroup
+}
+
+% \ThmLookupRegisterId{<id>}{<env>}{<number>}
+\NewDocumentCommand{\ThmLookupRegisterId}{m m m}{%
+  \begingroup
+    \csname protected@edef\endcsname\mxId{#1}%
+    \csname protected@edef\endcsname\mxEnv{#2}%
+    \csname protected@edef\endcsname\mxNum{#3}%
+
+    \edef\mxIdStr {\expandafter\detokenize\expandafter{\mxId}}%
+    \edef\mxEnvStr{\expandafter\detokenize\expandafter{\mxEnv}}%
+    \edef\mxNumStr{\expandafter\detokenize\expandafter{\mxNum}}%
+
+    \edef\mxLuaCode{%
+      thmlookup.register_id(
+        "\luaescapestring{\mxIdStr}",
+        "\luaescapestring{\mxEnvStr}",
+        "\luaescapestring{\mxNumStr}"
+      )%
+    }%
+    \directlua{\mxLuaCode}%
+  \endgroup
+}
+
+% \ThmRefByStructure{<expr>}  bzw. \ThmRefByStructure*{<expr>}
+\NewDocumentCommand{\ThmRefByStructure}{s O{} m}{%
+  \begingroup
+    \def\mxStar{false}%
+    \IfBooleanT{#1}{\def\mxStar{true}}%
+
+    % KEINE Expansion: sonst wird z.B. \bigcup -> \DOTSB\bigcup@\slimits@ ...
+    \edef\mxExprStr{\detokenize{#3}}%
+    \edef\mxOptsStr{\detokenize{#2}}%
+
+    \edef\mxLuaCode{%
+      thmlookup.ref_by_structure(
+        "\luaescapestring{\mxOptsStr}",
+        "\luaescapestring{\mxExprStr}",
+        \mxStar
+      )%
+    }%
+    \directlua{\mxLuaCode}%
+  \endgroup
+}
+
+
+% -------------------------
+% Forward-Ref-Variante (auflösbar ab dem 2. Lauf via .aux)
+% -------------------------
+\makeatletter
+
+% Wird aus der .aux gelesen und definiert die gecachte Referenz
+\NewDocumentCommand{\mxFwdNeed}{m m m m}{%
+  \directlua{
+    thmlookup.define_ref_macro(
+      "\luaescapestring{\detokenize{#1}}",
+      "\luaescapestring{\detokenize{#2}}",
+      "\luaescapestring{\detokenize{#3}}",
+      #4
+    )
+  }%
+}
+
+% \ThmRefByStructureFwd{<expr>} bzw. \ThmRefByStructureFwd*{<expr>}
+\NewDocumentCommand{\ThmRefByStructureFwd}{s O{} m}{%
+  \begingroup
+    \def\mxStarNum{0}%
+    \IfBooleanT{#1}{\def\mxStarNum{1}}%
+
+    \edef\mxExpr{\unexpanded\expandafter{#3}}%
+    \edef\mxExprStr{\expandafter\detokenize\expandafter{\mxExpr}}%
+    \edef\mxOptsStr{\detokenize{#2}}%
+
+    % Query-Key in \mxFwdQKey schreiben lassen
+    \directlua{
+      local q = thmlookup.query_key("\luaescapestring{\mxOptsStr}", "\luaescapestring{\mxExprStr}")
+      tex.sprint("\\gdef\\mxFwdQKey{" .. q .. "}")
+    }%
+
+    % immer in .aux schreiben
+    \protected@write\@auxout{}{%
+      \string\mxFwdNeed{\mxFwdQKey}{\mxOptsStr}{\mxExprStr}{\mxStarNum}%
+    }%
+    
+    % nur falls noch nicht definiert: sofort versuchen
+    \expandafter\ifx\csname mxFwdRef@\mxFwdQKey\endcsname\relax
+      \mxFwdNeed{\mxFwdQKey}{\mxOptsStr}{\mxExprStr}{\mxStarNum}%
+    \fi
+    
+    \csname mxFwdRef@\mxFwdQKey\endcsname
+
+
+  \endgroup
+}
+
+\makeatother
+
+
+\NewDocumentCommand{\ThmRefById}{m}{%
+  \directlua{
+    thmlookup.ref_by_id("\luaescapestring{\detokenize{#1}}")
+  }%
+}
+
+% IMPORTANT: muss VOR dem Einlesen der .aux passieren, sonst bleiben Fwd-Refs "nicht gefunden"
+\directlua{
+  if not thmlookup.__prepared then
+    thmlookup.prepare_run()
+    thmlookup.__prepared = true
+  end
+}
+

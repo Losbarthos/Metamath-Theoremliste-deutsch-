@@ -1,0 +1,66 @@
+% tex/impl/commands/sets.tex
+\ProvidesFile{sets.tex}[2026/01/04 Set-theoretic notation]
+
+% Klammerhilfen: funktionieren auch in Textmodus
+\providecommand{\paren}[1]{\ensuremath{\left(#1\right)}}
+\providecommand{\brak}[1]{\ensuremath{\left[#1\right]}}
+\providecommand{\set}[1]{\ensuremath{\left\{#1\right\}}}
+
+% Potenzmenge
+\providecommand{\powerset}{\ensuremath{\mathcal{P}}}
+
+\makeatletter
+% Mitgliedschaftsrelation: \MemRel  oder \MemRel(M)
+\def\MemRel{%
+  \@ifnextchar({\MemRel@args}{\MemRel@name}%
+}
+\def\MemRel@name{%
+  \ensuremath{R}%
+}
+\def\MemRel@args(#1){%
+  \ensuremath{R_{#1}}%
+}
+
+% (Falls du sie brauchst) CoverFam / PartFam: \CoverFam oder \CoverFam(M,A)
+\def\CoverFam{%
+  \@ifnextchar({\CoverFam@args}{\CoverFam@name}%
+}
+\def\CoverFam@name{%
+  \ensuremath{\mathsf{CoverFam}}%
+}
+\def\CoverFam@args(#1,#2){%
+  \ensuremath{\mathsf{CoverFam}\!\left(#1,#2\right)}%
+}
+
+\def\PartFam{%
+  \@ifnextchar({\PartFam@args}{\PartFam@name}%
+}
+\def\PartFam@name{%
+  \ensuremath{\mathsf{PartFam}}%
+}
+\def\PartFam@args(#1,#2){%
+  \ensuremath{\mathsf{PartFam}\!\left(#1,#2\right)}%
+}
+
+% Vereinigungsabgeschlossene Familie: \UnionClosedFam oder \UnionClosedFam(M)
+\def\UnionClosedFam{%
+  \@ifnextchar({\UnionClosedFam@args}{\UnionClosedFam@name}%
+}
+\def\UnionClosedFam@name{%
+  \ensuremath{\mathsf{UnionClosedFam}}%
+}
+\def\UnionClosedFam@args(#1){%
+  \ensuremath{\mathsf{UnionClosedFam}\!\left(#1\right)}%
+}
+\makeatother
+
+% ------------------------------------------------------------
+% Kardinalität / Gleichmächtigkeit
+% ------------------------------------------------------------
+\providecommand{\EqCard}{\mathrel{\approx}}
+
+
+% commands/sets.tex
+\DeclareMathOperator{\Induktiv}{Induktiv}
+
+\newcommand{\SOmit}[1]{S_{#1}}

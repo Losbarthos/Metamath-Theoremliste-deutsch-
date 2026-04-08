@@ -1,0 +1,1895 @@
+%============================================================
+%  Bd. 02 - Theoreme der Logik: Vertiefte Beweise und Methoden
+%============================================================
+
+\documentclass[main.tex]{subfiles}
+
+\title{CLASSICAL FIRST-ORDER LOGIC WITH EQUALITY}
+\author{Martin Kunze}
+\date{}
+
+\ifSubfilesClassLoaded{
+    \usepackage{xr-hyper}
+  \externaldocument{registry/_B01}
+}{
+   % Code für als Subfile eingebunden
+}
+
+% Band-2 Registry/Debug unter festem Namen schreiben
+\ifSubfilesClassLoaded{
+  \directlua{
+    thmlookup.registry_path = "registry/_B02.registry.tsv"
+    thmlookup.debug_path    = "registry/_B02.debug.log"
+    thmlookup.prepare_run()
+    thmlookup.load_registry_file("registry/_B01.registry.tsv")
+  }
+}{}
+
+
+\begin{document}
+\maketitle
+\tableofcontents
+%\listoftheorems
+\setcounter{file}{2}
+\renewcommand{\FormulaBandID}{2}
+
+
+\chapter{Pre-logic}
+
+\section{Inferences for assisting proof development}
+
+\begin{remark}
+Die folgenden Hilfsinferenzregeln dienen nur der technischen Entwicklung von Beweisen in
+Metamath. Sie gehören nicht zum eigentlichen mathematischen Kern des Kalküls und treten
+in ausgearbeiteten Endbeweisen normalerweise nicht mehr auf.
+\end{remark}
+
+\FormulaThm[Identity inference for proof development]{%
+  P \vdash P%
+}{idi}{%
+  \DeltaRow{Propositions}{P}%
+}
+\begin{tabproof}
+  \proofstep{1}{P}{\rA}
+\end{tabproof}
+
+\FormulaThm[Auxiliary inference for proof development]{%
+  P \dsep Q \vdash P%
+}{a1ii}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{1}{P}{\rA}
+  \proofstep{2}{Q}{\rA}
+  \proofstep{1,2}{P}{\rAEa{1}}
+\end{tabproof}
+
+\begin{hint}
+In Metamath werden \FormulaRefAuto{idi} und \FormulaRefAuto{a1ii} als rein technische
+Hilfsmittel zur Beweiskonstruktion verwendet. Sie können in einem mathematischen Skript
+übergangen oder in einen Anhang ausgelagert werden.
+\end{hint}
+
+\chapter{Propositional calculus}
+
+\section{Primitive well-formed formulas}
+
+\FormulaDef[Negation as a formation rule]{%
+  \text{If } P \text{ is a wff, then } \neg P \text{ is a wff.}%
+}{wn}{%
+  \DeltaRow{Propositions}{P}%
+}
+
+\FormulaDef[Implication as a formation rule]{%
+  \text{If } P \text{ and } Q \text{ are wffs, then } (P \rightarrow Q) \text{ is a wff.}%
+}{wi}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+
+\begin{remark}
+Die Aussagenlogik behandelt allgemeine Wahrheiten über wohlgeformte Formeln unabhängig
+davon, wie diese aufgebaut sind. Der einfachste Satz ist \((P \rightarrow P)\), der zwar
+inhaltlich trivial erscheint, aber aus den Axiomen hergeleitet werden muss.
+\end{remark}
+
+\section{The axioms of propositional calculus}
+
+\begin{remark}
+Das hier verwendete Aussagenkalkül besteht aus den drei Grundaxiomen
+\FormulaRefAuto{ax-1}, \FormulaRefAuto{ax-2}, \FormulaRefAuto{ax-3}
+sowie der Schlussregel \FormulaRefAuto{ax-mp}. Die späteren Resultate des
+Abschnitts über logische Implikation verwenden zunächst nur
+\FormulaRefAuto{ax-mp}, \FormulaRefAuto{ax-1} und \FormulaRefAuto{ax-2}.
+\end{remark}
+
+\FormulaAxiom[Modus Ponens]{%
+  P \dsep P \rightarrow Q \vdash Q%
+}{ax-mp}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{1}{P}{\rA}
+  \proofstep{2}{P \rightarrow Q}{\rA}
+  \proofstep{1,2}{Q}{\rRE{2,1}}
+\end{tabproof}
+
+\FormulaAxiom[Simp]{%
+  Q \rightarrow (P \rightarrow Q)%
+}{ax-1}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{1}{Q}{\rA}
+  \proofstep{2}{P}{\rA}
+  \proofstep{1,2}{Q \land P}{\rAI{1,2}}
+  \proofstep{1,2}{Q}{\rAEa{3}}
+  \proofstep{1}{P \rightarrow Q}{\rRI{2,4}}
+  \proofstep{}{Q \rightarrow (P \rightarrow Q)}{\rRI{1,5}}
+\end{tabproof}
+
+\FormulaAxiom[Frege]{%
+  (P \rightarrow (Q \rightarrow R)) \rightarrow ((P \rightarrow Q) \rightarrow (P \rightarrow R))
+}{ax-2}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{2}{P \rightarrow Q}{\rA}
+  \proofstep{3}{P}{\rA}
+  \proofstep{1,3}{Q \rightarrow R}{\rRE{1,3}}
+  \proofstep{2,3}{Q}{\rRE{2,3}}
+  \proofstep{1,2,3}{R}{\rRE{4,5}}
+  \proofstep{1,2}{P \rightarrow R}{\rRI{3,6}}
+  \proofstep{1}{(P \rightarrow Q) \rightarrow (P \rightarrow R)}{\rRI{2,7}}
+  \proofstep{}{(P \rightarrow (Q \rightarrow R)) \rightarrow ((P \rightarrow Q) \rightarrow (P \rightarrow R))}{\rRI{1,8}}
+\end{tabproof}
+
+\FormulaThm[Transp]{%
+  (\neg P \rightarrow \neg Q) \rightarrow (Q \rightarrow P)%
+}{ax-3}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{1}{\neg P \rightarrow \neg Q}{\rA}
+  \proofstep{2}{Q}{\rA}
+  \proofstep{3}{\neg P}{\rA}
+  \proofstep{1,3}{\neg Q}{\rRE{1,3}}
+  \proofstep{1,2,3}{\bot}{\rBI{2,4}}
+  \proofstep{1,2}{P}{\rCE{3,5}}
+  \proofstep{1}{Q \rightarrow P}{\rRI{2,7}}
+  \proofstep{}{(\neg P \rightarrow \neg Q) \rightarrow (Q \rightarrow P)}{\rRI{1,8}}
+\end{tabproof}
+
+\section{Logical implication}
+
+\FormulaThm[Double modus ponens]{%
+  P \dsep Q \dsep P \rightarrow (Q \rightarrow R) \vdash R%
+}{mp2}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{P}{\rA}
+  \proofstep{2}{Q}{\rA}
+  \proofstep{3}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{1,3}{Q \rightarrow R}{\FormulaRefAuto{ax-mp}{1,3}}
+  \proofstep{1,2,3}{R}{\FormulaRefAuto{ax-mp}{2,4}}
+\end{tabproof}
+
+\FormulaThm[Double modus ponens]{%
+  P \dsep P \rightarrow Q \dsep Q \rightarrow R \vdash R%
+}{mp2b}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{P}{\rA}
+  \proofstep{2}{P \rightarrow Q}{\rA}
+  \proofstep{3}{Q \rightarrow R}{\rA}
+  \proofstep{1,2}{Q}{\FormulaRefAuto{ax-mp}{1,2}}
+  \proofstep{1,2,3}{R}{\FormulaRefAuto{ax-mp}{4,3}}
+\end{tabproof}
+
+\FormulaThm[Inference introducing an antecedent]{%
+  P \vdash Q \rightarrow P%
+}{a1i}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{1}{P}{\rA}
+  \proofstep{}{P \rightarrow (Q \rightarrow P)}{\FormulaRefAuto{ax-1}}
+  \proofstep{1}{Q \rightarrow P}{\FormulaRefAuto{ax-mp}{1,2}}
+\end{tabproof}
+
+\FormulaThm[Inference introducing two antecedents]{%
+  P \vdash Q \rightarrow (R \rightarrow P)%
+}{2a1i}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{P}{\rA}
+  \proofstep{1}{R \rightarrow P}{\FormulaRefAuto{a1i}{1}}
+  \proofstep{1}{Q \rightarrow (R \rightarrow P)}{\FormulaRefAuto{a1i}{2}}
+\end{tabproof}
+
+\FormulaThm[Inference detaching an antecedent and introducing a new one]{%
+  P \dsep P \rightarrow Q \vdash R \rightarrow Q%
+}{mp1i}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{P}{\rA}
+  \proofstep{2}{P \rightarrow Q}{\rA}
+  \proofstep{1,2}{Q}{\FormulaRefAuto{ax-mp}{1,2}}
+  \proofstep{1,2}{R \rightarrow Q}{\FormulaRefAuto{a1i}{3}}
+\end{tabproof}
+
+\FormulaThm[Inference distributing an antecedent]{%
+  P \rightarrow (Q \rightarrow R) \vdash (P \rightarrow Q) \rightarrow (P \rightarrow R)%
+}{a2i}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{}{(P \rightarrow (Q \rightarrow R)) \rightarrow ((P \rightarrow Q) \rightarrow (P \rightarrow R))}{\FormulaRefAuto{ax-2}}
+  \proofstep{1}{(P \rightarrow Q) \rightarrow (P \rightarrow R)}{\FormulaRefAuto{ax-mp}{1,2}}
+\end{tabproof}
+
+\FormulaThm[A modus ponens deduction]{%
+  P \rightarrow Q \dsep P \rightarrow (Q \rightarrow R) \vdash P \rightarrow R%
+}{mpd}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{2}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{2}{(P \rightarrow Q) \rightarrow (P \rightarrow R)}{\FormulaRefAuto{a2i}{2}}
+  \proofstep{1,2}{P \rightarrow R}{\FormulaRefAuto{ax-mp}{1,3}}
+\end{tabproof}
+
+\FormulaThm[Inference adding common antecedents in an implication]{%
+  P \rightarrow Q \vdash (R \rightarrow P) \rightarrow (R \rightarrow Q)%
+}{imim2i}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{1}{R \rightarrow (P \rightarrow Q)}{\FormulaRefAuto{a1i}{1}}
+  \proofstep{1}{(R \rightarrow P) \rightarrow (R \rightarrow Q)}{\FormulaRefAuto{a2i}{2}}
+\end{tabproof}
+
+\FormulaThm[Syllogism]{%
+  P \rightarrow Q \dsep Q \rightarrow R \vdash P \rightarrow R%
+}{syl}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{2}{Q \rightarrow R}{\rA}
+  \proofstep{2}{P \rightarrow (Q \rightarrow R)}{\FormulaRefAuto{a1i}{2}}
+  \proofstep{1,2}{P \rightarrow R}{\FormulaRefAuto{mpd}{1,3}}
+\end{tabproof}
+
+\FormulaThm[Inference chaining two syllogisms]{%
+  P \rightarrow Q \dsep Q \rightarrow R \dsep R \rightarrow S \vdash P \rightarrow S%
+}{3syl}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{2}{Q \rightarrow R}{\rA}
+  \proofstep{3}{R \rightarrow S}{\rA}
+  \proofstep{1,2}{P \rightarrow R}{\FormulaRefAuto{syl}{1,2}}
+  \proofstep{1,2,3}{P \rightarrow S}{\FormulaRefAuto{syl}{4,3}}
+\end{tabproof}
+
+\FormulaThm[Inference chaining three syllogisms]{%
+  P \rightarrow Q \dsep Q \rightarrow R \dsep R \rightarrow S \dsep S \rightarrow T \vdash P \rightarrow T%
+}{4syl}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{2}{Q \rightarrow R}{\rA}
+  \proofstep{3}{R \rightarrow S}{\rA}
+  \proofstep{4}{S \rightarrow T}{\rA}
+  \proofstep{1,2,3}{P \rightarrow S}{\FormulaRefAuto{3syl}{1,2,3}}
+  \proofstep{1,2,3,4}{P \rightarrow T}{\FormulaRefAuto{syl}{5,4}}
+\end{tabproof}
+
+\FormulaThm[A nested modus ponens inference]{%
+  Q \dsep P \rightarrow (Q \rightarrow R) \vdash P \rightarrow R%
+}{mpi}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{Q}{\rA}
+  \proofstep{2}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{1}{P \rightarrow Q}{\FormulaRefAuto{a1i}{1}}
+  \proofstep{1,2}{P \rightarrow R}{\FormulaRefAuto{mpd}{3,2}}
+\end{tabproof}
+
+\FormulaThm[A syllogism combined with a modus ponens inference]{%
+  P \rightarrow Q \dsep R \dsep Q \rightarrow (R \rightarrow S) \vdash P \rightarrow S%
+}{mpisyl}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{2}{R}{\rA}
+  \proofstep{3}{Q \rightarrow (R \rightarrow S)}{\rA}
+  \proofstep{2,3}{Q \rightarrow S}{\FormulaRefAuto{mpi}{2,3}}
+  \proofstep{1,2,3}{P \rightarrow S}{\FormulaRefAuto{syl}{1,4}}
+\end{tabproof}
+
+\FormulaThm[Principle of identity]{%
+  P \rightarrow P%
+}{id}{%
+  \DeltaRow{Propositions}{P}%
+}
+\begin{tabproof}
+  \proofstep{}{P \rightarrow (P \rightarrow P)}{\FormulaRefAuto{ax-1}}
+  \proofstep{}{P \rightarrow ((P \rightarrow P) \rightarrow P)}{\FormulaRefAuto{ax-1}}
+  \proofstep{}{P \rightarrow P}{\FormulaRefAuto{mpd}{1,2}}
+\end{tabproof}
+\begin{remark}
+\FormulaRefAuto{id} ist die elementarste Tautologie des Aussagenkalküls. Obwohl die Aussage inhaltlich selbstverständlich wirkt, zeigt ihr Beweis, dass selbst die Selbstimplikation \(P \rightarrow P\) im syntaktischen Aufbau erst aus den Axiomen gewonnen werden muss. Die Variante \FormulaRefAuto{idALT} ist vor allem didaktisch interessant, weil sie denselben Satz unmittelbar aus den Grundaxiomen herleitet.
+\end{remark}
+
+\FormulaThm[Alternate proof of the principle of identity]{%
+  P \rightarrow P'%
+}{idALT}{%
+  \DeltaRow{Propositions}{P}%
+}
+\begin{tabproof}
+  \proofstep{}{P \rightarrow (P \rightarrow P)}{\FormulaRefAuto{ax-1}}
+  \proofstep{}{P \rightarrow ((P \rightarrow P) \rightarrow P)}{\FormulaRefAuto{ax-1}}
+  \proofstep{}{%
+    (P \rightarrow ((P \rightarrow P) \rightarrow P)) \rightarrow
+    ((P \rightarrow (P \rightarrow P)) \rightarrow (P \rightarrow P))
+  }{\FormulaRefAuto{ax-2}}
+  \proofstep{}{(P \rightarrow (P \rightarrow P)) \rightarrow (P \rightarrow P)}{\FormulaRefAuto{ax-mp}{2,3}}
+  \proofstep{}{P \rightarrow P}{\FormulaRefAuto{ax-mp}{1,4}}
+\end{tabproof}
+
+\FormulaThm[Principle of identity with antecedent]{%
+  P \rightarrow (Q \rightarrow Q)%
+}{idd}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{}{Q \rightarrow Q}{\FormulaRefAuto{id}}
+  \proofstep{}{P \rightarrow (Q \rightarrow Q)}{\FormulaRefAuto{a1i}{1}}
+\end{tabproof}
+
+\FormulaThm[Deduction introducing an embedded antecedent]{%
+  P \rightarrow Q \vdash P \rightarrow (R \rightarrow Q)%
+}{a1d}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{}{Q \rightarrow (R \rightarrow Q)}{\FormulaRefAuto{ax-1}}
+  \proofstep{1}{P \rightarrow (R \rightarrow Q)}{\FormulaRefAuto{syl}{1,2}}
+\end{tabproof}
+
+\FormulaThm[Deduction introducing two antecedents]{%
+  P \rightarrow Q \vdash P \rightarrow (R \rightarrow (S \rightarrow Q))%
+}{2a1d}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{1}{P \rightarrow (S \rightarrow Q)}{\FormulaRefAuto{a1d}{1}}
+  \proofstep{1}{P \rightarrow (R \rightarrow (S \rightarrow Q))}{\FormulaRefAuto{a1d}{2}}
+\end{tabproof}
+
+\FormulaThm[Add two antecedents to a wff]{%
+  Q \rightarrow S \vdash P \rightarrow (Q \rightarrow (R \rightarrow S))%
+}{a1i13}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{Q \rightarrow S}{\rA}
+  \proofstep{1}{Q \rightarrow (R \rightarrow S)}{\FormulaRefAuto{a1d}{1}}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow S))}{\FormulaRefAuto{a1i}{2}}
+\end{tabproof}
+
+\FormulaThm[A double form of ax-1]{%
+  P \rightarrow (Q \rightarrow (R \rightarrow P))%
+}{2a1}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{}{P \rightarrow P}{\FormulaRefAuto{id}}
+  \proofstep{}{P \rightarrow (Q \rightarrow (R \rightarrow P))}{\FormulaRefAuto{2a1d}{1}}
+\end{tabproof}
+
+\FormulaThm[Deduction distributing an embedded antecedent]{%
+  P \rightarrow (Q \rightarrow (R \rightarrow S)) \vdash
+  P \rightarrow ((Q \rightarrow R) \rightarrow (Q \rightarrow S))%
+}{a2d}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow S))}{\rA}
+  \proofstep{}{(Q \rightarrow (R \rightarrow S)) \rightarrow ((Q \rightarrow R) \rightarrow (Q \rightarrow S))}{\FormulaRefAuto{ax-2}}
+  \proofstep{1}{P \rightarrow ((Q \rightarrow R) \rightarrow (Q \rightarrow S))}{\FormulaRefAuto{syl}{1,2}}
+\end{tabproof}
+
+\FormulaThm[Syllogism inference with commutation of antecedents]{%
+  P \rightarrow (Q \rightarrow R) \dsep Q \rightarrow (R \rightarrow S) \vdash P \rightarrow (Q \rightarrow S)%
+}{sylcom}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{2}{Q \rightarrow (R \rightarrow S)}{\rA}
+  \proofstep{2}{P \rightarrow (Q \rightarrow (R \rightarrow S))}{\FormulaRefAuto{a1i}{2}}
+  \proofstep{2}{P \rightarrow ((Q \rightarrow R) \rightarrow (Q \rightarrow S))}{\FormulaRefAuto{a2d}{3}}
+  \proofstep{1,2}{P \rightarrow (Q \rightarrow S)}{\FormulaRefAuto{mpd}{1,4}}
+\end{tabproof}
+
+\FormulaThm[Syllogism inference with commuted antecedents]{%
+  P \rightarrow Q \dsep R \rightarrow (Q \rightarrow S) \vdash P \rightarrow (R \rightarrow S)%
+}{syl5com}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{2}{R \rightarrow (Q \rightarrow S)}{\rA}
+  \proofstep{1}{P \rightarrow (R \rightarrow Q)}{\FormulaRefAuto{a1d}{1}}
+  \proofstep{1,2}{P \rightarrow (R \rightarrow S)}{\FormulaRefAuto{sylcom}{3,2}}
+\end{tabproof}
+
+\FormulaThm[Inference that swaps antecedents in an implication]{%
+  P \rightarrow (Q \rightarrow R) \vdash Q \rightarrow (P \rightarrow R)%
+}{com12}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{}{Q \rightarrow Q}{\FormulaRefAuto{id}}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{1}{Q \rightarrow (P \rightarrow R)}{\FormulaRefAuto{syl5com}{1,2}}
+\end{tabproof}
+
+\FormulaThm[A syllogism inference]{%
+  P \rightarrow (Q \rightarrow R) \dsep S \rightarrow P \vdash Q \rightarrow (S \rightarrow R)%
+}{syl11}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{2}{S \rightarrow P}{\rA}
+  \proofstep{1}{Q \rightarrow (P \rightarrow R)}{\FormulaRefAuto{com12}{1}}
+  \proofstep{1,2}{S \rightarrow (Q \rightarrow R)}{\FormulaRefAuto{syl5com}{2,3}}
+  \proofstep{1,2}{Q \rightarrow (S \rightarrow R)}{\FormulaRefAuto{com12}{4}}
+\end{tabproof}
+
+\FormulaThm[A syllogism rule of inference]{%
+  P \rightarrow Q \dsep R \rightarrow (Q \rightarrow S) \vdash R \rightarrow (P \rightarrow S)%
+}{syl5}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{2}{R \rightarrow (Q \rightarrow S)}{\rA}
+  \proofstep{1,2}{P \rightarrow (R \rightarrow S)}{\FormulaRefAuto{syl5com}{1,2}}
+  \proofstep{1,2}{R \rightarrow (P \rightarrow S)}{\FormulaRefAuto{com12}{3}}
+\end{tabproof}
+
+\FormulaThm[A syllogism rule of inference]{%
+  P \rightarrow (Q \rightarrow R) \dsep R \rightarrow S \vdash P \rightarrow (Q \rightarrow S)%
+}{syl6}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{2}{R \rightarrow S}{\rA}
+  \proofstep{2}{Q \rightarrow (R \rightarrow S)}{\FormulaRefAuto{a1i}{2}}
+  \proofstep{1,2}{P \rightarrow (Q \rightarrow S)}{\FormulaRefAuto{sylcom}{1,3}}
+\end{tabproof}
+
+\FormulaThm[Combine syl5 and syl6]{%
+  P \rightarrow Q \dsep R \rightarrow (Q \rightarrow S) \dsep S \rightarrow T \vdash R \rightarrow (P \rightarrow T)%
+}{syl56}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{2}{R \rightarrow (Q \rightarrow S)}{\rA}
+  \proofstep{3}{S \rightarrow T}{\rA}
+  \proofstep{1,2}{R \rightarrow (P \rightarrow S)}{\FormulaRefAuto{syl5}{1,2}}
+  \proofstep{1,2,3}{R \rightarrow (P \rightarrow T)}{\FormulaRefAuto{syl6}{4,3}}
+\end{tabproof}
+
+\FormulaThm[Syllogism inference with commuted antecedents]{%
+  P \rightarrow (Q \rightarrow R) \dsep R \rightarrow S \vdash Q \rightarrow (P \rightarrow S)%
+}{syl6com}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{2}{R \rightarrow S}{\rA}
+  \proofstep{1,2}{P \rightarrow (Q \rightarrow S)}{\FormulaRefAuto{syl6}{1,2}}
+  \proofstep{1,2}{Q \rightarrow (P \rightarrow S)}{\FormulaRefAuto{com12}{3}}
+\end{tabproof}
+
+\FormulaThm[Modus ponens inference with commutation of antecedents]{%
+  Q \rightarrow P \dsep P \rightarrow (Q \rightarrow R) \vdash Q \rightarrow R%
+}{mpcom}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{Q \rightarrow P}{\rA}
+  \proofstep{2}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{2}{Q \rightarrow (P \rightarrow R)}{\FormulaRefAuto{com12}{2}}
+  \proofstep{1,2}{Q \rightarrow R}{\FormulaRefAuto{mpd}{1,3}}
+\end{tabproof}
+
+\FormulaThm[Syllogism inference with common nested antecedent]{%
+  Q \rightarrow (P \rightarrow R) \dsep R \rightarrow (P \rightarrow S) \vdash Q \rightarrow (P \rightarrow S)%
+}{syli}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{Q \rightarrow (P \rightarrow R)}{\rA}
+  \proofstep{2}{R \rightarrow (P \rightarrow S)}{\rA}
+  \proofstep{2}{P \rightarrow (R \rightarrow S)}{\FormulaRefAuto{com12}{2}}
+  \proofstep{1,2}{Q \rightarrow (P \rightarrow S)}{\FormulaRefAuto{sylcom}{1,3}}
+\end{tabproof}
+
+\FormulaThm[Replace two antecedents]{%
+  P \rightarrow Q \dsep R \rightarrow S \dsep Q \rightarrow (S \rightarrow T) \vdash P \rightarrow (R \rightarrow T)%
+}{syl2im}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{2}{R \rightarrow S}{\rA}
+  \proofstep{3}{Q \rightarrow (S \rightarrow T)}{\rA}
+  \proofstep{2,3}{R \rightarrow (Q \rightarrow T)}{\FormulaRefAuto{syl5com}{2,3}}
+  \proofstep{2,3}{Q \rightarrow (R \rightarrow T)}{\FormulaRefAuto{com12}{4}}
+  \proofstep{1,2,3}{P \rightarrow (R \rightarrow T)}{\FormulaRefAuto{syl}{1,5}}
+\end{tabproof}
+
+\FormulaThm[A commuted version of syl2im]{%
+  P \rightarrow Q \dsep R \rightarrow S \dsep Q \rightarrow (S \rightarrow T) \vdash R \rightarrow (P \rightarrow T)%
+}{syl2imc}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{2}{R \rightarrow S}{\rA}
+  \proofstep{3}{Q \rightarrow (S \rightarrow T)}{\rA}
+  \proofstep{1,2,3}{P \rightarrow (R \rightarrow T)}{\FormulaRefAuto{syl2im}{1,2,3}}
+  \proofstep{1,2,3}{R \rightarrow (P \rightarrow T)}{\FormulaRefAuto{com12}{4}}
+\end{tabproof}
+
+\FormulaThm[Assertion]{%
+  P \rightarrow ((P \rightarrow Q) \rightarrow Q)%
+}{pm2.27}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{}{(P \rightarrow Q) \rightarrow (P \rightarrow Q)}{\FormulaRefAuto{id}}
+  \proofstep{}{%
+    ((P \rightarrow Q) \rightarrow (P \rightarrow Q)) \rightarrow
+    (((P \rightarrow Q) \rightarrow P) \rightarrow ((P \rightarrow Q) \rightarrow Q))
+  }{\FormulaRefAuto{ax-2}}
+  \proofstep{}{((P \rightarrow Q) \rightarrow P) \rightarrow ((P \rightarrow Q) \rightarrow Q)}{\FormulaRefAuto{ax-mp}{1,2}}
+  \proofstep{}{P \rightarrow ((P \rightarrow Q) \rightarrow P)}{\FormulaRefAuto{ax-1}}
+  \proofstep{}{%
+    (P \rightarrow ((P \rightarrow Q) \rightarrow P)) \rightarrow
+    (P \rightarrow ((P \rightarrow Q) \rightarrow Q))
+  }{\FormulaRefAuto{imim2i}{3}}
+  \proofstep{}{P \rightarrow ((P \rightarrow Q) \rightarrow Q)}{\FormulaRefAuto{ax-mp}{4,5}}
+\end{tabproof}
+
+\FormulaThm[A nested modus ponens deduction]{%
+  P \rightarrow (Q \rightarrow R) \dsep P \rightarrow (Q \rightarrow (R \rightarrow S)) \vdash P \rightarrow (Q \rightarrow S)%
+}{mpdd}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{2}{P \rightarrow (Q \rightarrow (R \rightarrow S))}{\rA}
+  \proofstep{2}{P \rightarrow ((Q \rightarrow R) \rightarrow (Q \rightarrow S))}{\FormulaRefAuto{a2d}{2}}
+  \proofstep{1,2}{P \rightarrow (Q \rightarrow S)}{\FormulaRefAuto{mpd}{1,3}}
+\end{tabproof}
+
+\FormulaThm[A nested modus ponens deduction]{%
+  P \rightarrow R \dsep P \rightarrow (Q \rightarrow (R \rightarrow S)) \vdash P \rightarrow (Q \rightarrow S)%
+}{mpid}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow R}{\rA}
+  \proofstep{2}{P \rightarrow (Q \rightarrow (R \rightarrow S))}{\rA}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\FormulaRefAuto{a1d}{1}}
+  \proofstep{1,2}{P \rightarrow (Q \rightarrow S)}{\FormulaRefAuto{mpdd}{3,2}}
+\end{tabproof}
+
+\FormulaThm[A nested modus ponens deduction]{%
+  Q \rightarrow R \dsep P \rightarrow (Q \rightarrow (R \rightarrow S)) \vdash P \rightarrow (Q \rightarrow S)%
+}{mpdi}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{Q \rightarrow R}{\rA}
+  \proofstep{2}{P \rightarrow (Q \rightarrow (R \rightarrow S))}{\rA}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\FormulaRefAuto{a1i}{1}}
+  \proofstep{1,2}{P \rightarrow (Q \rightarrow S)}{\FormulaRefAuto{mpdd}{3,2}}
+\end{tabproof}
+
+\FormulaThm[A doubly nested modus ponens inference]{%
+  R \dsep P \rightarrow (Q \rightarrow (R \rightarrow S)) \vdash P \rightarrow (Q \rightarrow S)%
+}{mpii}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{R}{\rA}
+  \proofstep{2}{P \rightarrow (Q \rightarrow (R \rightarrow S))}{\rA}
+  \proofstep{1}{Q \rightarrow R}{\FormulaRefAuto{a1i}{1}}
+  \proofstep{1,2}{P \rightarrow (Q \rightarrow S)}{\FormulaRefAuto{mpdi}{3,2}}
+\end{tabproof}
+
+\FormulaThm[Syllogism deduction]{%
+  P \rightarrow (Q \rightarrow R) \dsep P \rightarrow (R \rightarrow S) \vdash P \rightarrow (Q \rightarrow S)%
+}{syld}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{2}{P \rightarrow (R \rightarrow S)}{\rA}
+  \proofstep{2}{P \rightarrow (Q \rightarrow (R \rightarrow S))}{\FormulaRefAuto{a1d}{2}}
+  \proofstep{1,2}{P \rightarrow (Q \rightarrow S)}{\FormulaRefAuto{mpdd}{1,3}}
+\end{tabproof}
+
+\FormulaThm[Syllogism deduction]{%
+  P \rightarrow (Q \rightarrow R) \dsep P \rightarrow (R \rightarrow S) \vdash Q \rightarrow (P \rightarrow S)%
+}{syldc}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{2}{P \rightarrow (R \rightarrow S)}{\rA}
+  \proofstep{1,2}{P \rightarrow (Q \rightarrow S)}{\FormulaRefAuto{syld}{1,2}}
+  \proofstep{1,2}{Q \rightarrow (P \rightarrow S)}{\FormulaRefAuto{com12}{3}}
+\end{tabproof}
+
+\FormulaThm[A double modus ponens deduction]{%
+  P \rightarrow Q \dsep P \rightarrow R \dsep P \rightarrow (Q \rightarrow (R \rightarrow S)) \vdash P \rightarrow S%
+}{mp2d}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{2}{P \rightarrow R}{\rA}
+  \proofstep{3}{P \rightarrow (Q \rightarrow (R \rightarrow S))}{\rA}
+  \proofstep{2,3}{P \rightarrow (Q \rightarrow S)}{\FormulaRefAuto{mpid}{2,3}}
+  \proofstep{1,2,3}{P \rightarrow S}{\FormulaRefAuto{mpd}{1,4}}
+\end{tabproof}
+
+\FormulaThm[Double deduction introducing an antecedent]{%
+  P \rightarrow (Q \rightarrow R) \vdash P \rightarrow (Q \rightarrow (S \rightarrow R))%
+}{a1dd}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{}{R \rightarrow (S \rightarrow R)}{\FormulaRefAuto{ax-1}}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (S \rightarrow R))}{\FormulaRefAuto{syl6}{1,2}}
+\end{tabproof}
+
+\FormulaThm[Double deduction introducing two antecedents]{%
+  P \rightarrow (Q \rightarrow R) \vdash P \rightarrow (Q \rightarrow (S \rightarrow (T \rightarrow R)))%
+}{2a1dd}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (T \rightarrow R))}{\FormulaRefAuto{a1dd}{1}}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (S \rightarrow (T \rightarrow R)))}{\FormulaRefAuto{a1dd}{2}}
+\end{tabproof}
+
+\FormulaThm[Inference absorbing redundant antecedent]{%
+  P \rightarrow (P \rightarrow Q) \vdash P \rightarrow Q%
+}{pm2.43i}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (P \rightarrow Q)}{\rA}
+  \proofstep{}{(P \rightarrow (P \rightarrow Q)) \rightarrow (P \rightarrow Q)}{\FormulaRefAuto{pm2.43}}
+  \proofstep{1}{P \rightarrow Q}{\FormulaRefAuto{ax-mp}{1,2}}
+\end{tabproof}
+
+\FormulaThm[Deduction absorbing redundant antecedent]{%
+  P \rightarrow (Q \rightarrow (Q \rightarrow R)) \vdash P \rightarrow (Q \rightarrow R)%
+}{pm2.43d}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{}{Q \rightarrow Q}{\FormulaRefAuto{id}}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (Q \rightarrow R))}{\rA}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\FormulaRefAuto{mpdi}{1,2}}
+\end{tabproof}
+
+\FormulaThm[Inference absorbing redundant antecedent]{%
+  Q \rightarrow (P \rightarrow (Q \rightarrow R)) \vdash Q \rightarrow (P \rightarrow R)%
+}{pm2.43a}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{}{Q \rightarrow Q}{\FormulaRefAuto{id}}
+  \proofstep{1}{Q \rightarrow (P \rightarrow (Q \rightarrow R))}{\rA}
+  \proofstep{1}{Q \rightarrow (P \rightarrow R)}{\FormulaRefAuto{mpid}{2,1}}
+\end{tabproof}
+
+\FormulaThm[Inference absorbing redundant antecedent]{%
+  Q \rightarrow (P \rightarrow (Q \rightarrow R)) \vdash P \rightarrow (Q \rightarrow R)%
+}{pm2.43b}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{Q \rightarrow (P \rightarrow (Q \rightarrow R))}{\rA}
+  \proofstep{1}{Q \rightarrow (P \rightarrow R)}{\FormulaRefAuto{pm2.43a}{1}}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\FormulaRefAuto{com12}{2}}
+\end{tabproof}
+
+\FormulaThm[Absorption of redundant antecedent]{%
+  (P \rightarrow (P \rightarrow Q)) \rightarrow (P \rightarrow Q)%
+}{pm2.43}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{}{P \rightarrow ((P \rightarrow Q) \rightarrow Q)}{\FormulaRefAuto{pm2.27}}
+  \proofstep{}{(P \rightarrow ((P \rightarrow Q) \rightarrow Q)) \rightarrow ((P \rightarrow (P \rightarrow Q)) \rightarrow (P \rightarrow Q))}{\FormulaRefAuto{a2i}{1}}
+  \proofstep{}{(P \rightarrow (P \rightarrow Q)) \rightarrow (P \rightarrow Q)}{\FormulaRefAuto{ax-mp}{1,2}}
+\end{tabproof}
+
+\FormulaThm[Deduction adding nested antecedents]{%
+  P \rightarrow (Q \rightarrow R) \vdash P \rightarrow ((S \rightarrow Q) \rightarrow (S \rightarrow R))%
+}{imim2d}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{1}{P \rightarrow (S \rightarrow (Q \rightarrow R))}{\FormulaRefAuto{a1d}{1}}
+  \proofstep{1}{P \rightarrow ((S \rightarrow Q) \rightarrow (S \rightarrow R))}{\FormulaRefAuto{a2d}{2}}
+\end{tabproof}
+
+\FormulaThm[A closed form of syllogism]{%
+  (P \rightarrow Q) \rightarrow ((R \rightarrow P) \rightarrow (R \rightarrow Q))%
+}{imim2}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{}{(P \rightarrow Q) \rightarrow (R \rightarrow (P \rightarrow Q))}{\FormulaRefAuto{ax-1}}
+  \proofstep{}{(P \rightarrow Q) \rightarrow ((R \rightarrow P) \rightarrow (R \rightarrow Q))}{\FormulaRefAuto{a2d}{1}}
+\end{tabproof}
+
+\FormulaThm[Deduction embedding an antecedent]{%
+  P \rightarrow Q \dsep P \rightarrow (R \rightarrow S) \vdash P \rightarrow ((Q \rightarrow R) \rightarrow S)%
+}{embantd}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{2}{P \rightarrow (R \rightarrow S)}{\rA}
+  \proofstep{2}{P \rightarrow ((Q \rightarrow R) \rightarrow (Q \rightarrow S))}{\FormulaRefAuto{imim2d}{2}}
+  \proofstep{1,2}{P \rightarrow ((Q \rightarrow R) \rightarrow S)}{\FormulaRefAuto{mpid}{1,3}}
+\end{tabproof}
+
+\FormulaThm[Triple syllogism deduction]{%
+  P \rightarrow (Q \rightarrow R) \dsep P \rightarrow (R \rightarrow S) \dsep P \rightarrow (S \rightarrow T) \vdash P \rightarrow (Q \rightarrow T)%
+}{3syld}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{2}{P \rightarrow (R \rightarrow S)}{\rA}
+  \proofstep{1,2}{P \rightarrow (Q \rightarrow S)}{\FormulaRefAuto{syld}{1,2}}
+  \proofstep{4}{P \rightarrow (S \rightarrow T)}{\rA}
+  \proofstep{1,2,4}{P \rightarrow (Q \rightarrow T)}{\FormulaRefAuto{syld}{3,4}}
+\end{tabproof}
+
+\FormulaThm[A double syllogism inference]{%
+  P \rightarrow Q \dsep P \rightarrow (R \rightarrow S) \dsep Q \rightarrow (S \rightarrow T) \vdash P \rightarrow (R \rightarrow T)%
+}{sylsyld}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{2}{P \rightarrow (R \rightarrow S)}{\rA}
+  \proofstep{3}{Q \rightarrow (S \rightarrow T)}{\rA}
+  \proofstep{1,3}{P \rightarrow (S \rightarrow T)}{\FormulaRefAuto{syl}{1,3}}
+  \proofstep{1,2,3}{P \rightarrow (R \rightarrow T)}{\FormulaRefAuto{syld}{2,4}}
+\end{tabproof}
+
+\FormulaThm[Inference joining two implications]{%
+  P \rightarrow Q \dsep R \rightarrow S \vdash (Q \rightarrow R) \rightarrow (P \rightarrow S)%
+}{imim12i}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{2}{R \rightarrow S}{\rA}
+  \proofstep{2}{(Q \rightarrow R) \rightarrow (Q \rightarrow S)}{\FormulaRefAuto{imim2i}{2}}
+  \proofstep{1,2}{(Q \rightarrow R) \rightarrow (P \rightarrow S)}{\FormulaRefAuto{syl5}{1,3}}
+\end{tabproof}
+
+\FormulaThm[Inference adding common consequents in an implication]{%
+  P \rightarrow Q \vdash (Q \rightarrow R) \rightarrow (P \rightarrow R)%
+}{imim1i}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{}{R \rightarrow R}{\FormulaRefAuto{id}}
+  \proofstep{1}{(Q \rightarrow R) \rightarrow (P \rightarrow R)}{\FormulaRefAuto{imim12i}{1,2}}
+\end{tabproof}
+
+\FormulaThm[Inference adding three nested antecedents]{%
+  P \rightarrow (Q \rightarrow R) \vdash (S \rightarrow P) \rightarrow ((S \rightarrow Q) \rightarrow (S \rightarrow R))%
+}{imim3i}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{1}{(S \rightarrow P) \rightarrow (S \rightarrow (Q \rightarrow R))}{\FormulaRefAuto{imim2i}{1}}
+  \proofstep{1}{(S \rightarrow P) \rightarrow ((S \rightarrow Q) \rightarrow (S \rightarrow R))}{\FormulaRefAuto{a2d}{2}}
+\end{tabproof}
+
+
+\FormulaThm[A syllogism inference combined with contraction]{%
+  P \rightarrow Q \dsep P \rightarrow R \dsep Q \rightarrow (R \rightarrow S) \vdash P \rightarrow S%
+}{sylc}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{2}{P \rightarrow R}{\rA}
+  \proofstep{3}{Q \rightarrow (R \rightarrow S)}{\rA}
+  \proofstep{1,2,3}{P \rightarrow (P \rightarrow S)}{\FormulaRefAuto{syl2im}{1,2,3}}
+  \proofstep{1,2,3}{P \rightarrow S}{\FormulaRefAuto{pm2.43i}{4}}
+\end{tabproof}
+
+\FormulaThm[A syllogism inference combined with contraction]{%
+  P \rightarrow Q \dsep P \rightarrow R \dsep P \rightarrow S \dsep Q \rightarrow (R \rightarrow (S \rightarrow T)) \vdash P \rightarrow T%
+}{syl3c}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{2}{P \rightarrow R}{\rA}
+  \proofstep{3}{P \rightarrow S}{\rA}
+  \proofstep{4}{Q \rightarrow (R \rightarrow (S \rightarrow T))}{\rA}
+  \proofstep{1,2,4}{P \rightarrow (S \rightarrow T)}{\FormulaRefAuto{sylc}{1,2,4}}
+  \proofstep{1,2,3,4}{P \rightarrow T}{\FormulaRefAuto{mpd}{3,5}}
+\end{tabproof}
+
+\FormulaThm[A syllogism inference]{%
+  P \rightarrow (Q \rightarrow R) \dsep S \dsep R \rightarrow (S \rightarrow T) \vdash P \rightarrow (Q \rightarrow T)%
+}{syl6mpi}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{2}{S}{\rA}
+  \proofstep{3}{R \rightarrow (S \rightarrow T)}{\rA}
+  \proofstep{2,3}{R \rightarrow T}{\FormulaRefAuto{mpi}{2,3}}
+  \proofstep{1,2,3}{P \rightarrow (Q \rightarrow T)}{\FormulaRefAuto{syl6}{1,4}}
+\end{tabproof}
+
+\FormulaThm[Modus ponens combined with a syllogism inference]{%
+  P \dsep Q \rightarrow R \dsep P \rightarrow (R \rightarrow S) \vdash Q \rightarrow S%
+}{mpsyl}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P}{\rA}
+  \proofstep{2}{Q \rightarrow R}{\rA}
+  \proofstep{3}{P \rightarrow (R \rightarrow S)}{\rA}
+  \proofstep{1}{Q \rightarrow P}{\FormulaRefAuto{a1i}{1}}
+  \proofstep{1,2,3}{Q \rightarrow S}{\FormulaRefAuto{sylc}{4,2,3}}
+\end{tabproof}
+
+\FormulaThm[Modus ponens combined with a double syllogism inference]{%
+  P \dsep Q \rightarrow (R \rightarrow S) \dsep P \rightarrow (S \rightarrow T) \vdash Q \rightarrow (R \rightarrow T)%
+}{mpsylsyld}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P}{\rA}
+  \proofstep{2}{Q \rightarrow (R \rightarrow S)}{\rA}
+  \proofstep{3}{P \rightarrow (S \rightarrow T)}{\rA}
+  \proofstep{1}{Q \rightarrow P}{\FormulaRefAuto{a1i}{1}}
+  \proofstep{1,2,3}{Q \rightarrow (R \rightarrow T)}{\FormulaRefAuto{sylsyld}{4,2,3}}
+\end{tabproof}
+
+\FormulaThm[Inference combining syl6 with contraction]{%
+  P \rightarrow (Q \rightarrow R) \dsep P \rightarrow (Q \rightarrow S) \dsep R \rightarrow (S \rightarrow T) \vdash P \rightarrow (Q \rightarrow T)%
+}{syl6c}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{2}{P \rightarrow (Q \rightarrow S)}{\rA}
+  \proofstep{3}{R \rightarrow (S \rightarrow T)}{\rA}
+  \proofstep{1,3}{P \rightarrow (Q \rightarrow (S \rightarrow T))}{\FormulaRefAuto{syl6}{1,3}}
+  \proofstep{1,2,3}{P \rightarrow (Q \rightarrow T)}{\FormulaRefAuto{mpdd}{2,4}}
+\end{tabproof}
+
+\FormulaThm[A syllogism inference combined with contraction]{%
+  P \rightarrow (Q \rightarrow R) \dsep P \rightarrow S \dsep R \rightarrow (S \rightarrow T) \vdash P \rightarrow (Q \rightarrow T)%
+}{syl6ci}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{2}{P \rightarrow S}{\rA}
+  \proofstep{2}{P \rightarrow (Q \rightarrow S)}{\FormulaRefAuto{a1d}{2}}
+  \proofstep{4}{R \rightarrow (S \rightarrow T)}{\rA}
+  \proofstep{1,2,4}{P \rightarrow (Q \rightarrow T)}{\FormulaRefAuto{syl6c}{1,3,4}}
+\end{tabproof}
+
+\FormulaThm[Nested syllogism deduction]{%
+  P \rightarrow (Q \rightarrow (R \rightarrow S)) \dsep P \rightarrow (Q \rightarrow (S \rightarrow T)) \vdash P \rightarrow (Q \rightarrow (R \rightarrow T))%
+}{syldd}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow S))}{\rA}
+  \proofstep{2}{P \rightarrow (Q \rightarrow (S \rightarrow T))}{\rA}
+  \proofstep{}{(S \rightarrow T) \rightarrow ((R \rightarrow S) \rightarrow (R \rightarrow T))}{\FormulaRefAuto{imim2}}
+  \proofstep{1,2}{P \rightarrow (Q \rightarrow (R \rightarrow T))}{\FormulaRefAuto{syl6c}{2,1,3}}
+\end{tabproof}
+
+\FormulaThm[A nested syllogism deduction]{%
+  P \rightarrow (Q \rightarrow R) \dsep P \rightarrow (S \rightarrow (R \rightarrow T)) \vdash P \rightarrow (S \rightarrow (Q \rightarrow T))%
+}{syl5d}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{1}{P \rightarrow (S \rightarrow (Q \rightarrow R))}{\FormulaRefAuto{a1d}{1}}
+  \proofstep{3}{P \rightarrow (S \rightarrow (R \rightarrow T))}{\rA}
+  \proofstep{1,3}{P \rightarrow (S \rightarrow (Q \rightarrow T))}{\FormulaRefAuto{syldd}{2,3}}
+\end{tabproof}
+
+\FormulaThm[A syllogism rule of inference]{%
+  P \rightarrow Q \dsep R \rightarrow (S \rightarrow (Q \rightarrow T)) \vdash R \rightarrow (S \rightarrow (P \rightarrow T))%
+}{syl7}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{1}{R \rightarrow (P \rightarrow Q)}{\FormulaRefAuto{a1i}{1}}
+  \proofstep{3}{R \rightarrow (S \rightarrow (Q \rightarrow T))}{\rA}
+  \proofstep{1,3}{R \rightarrow (S \rightarrow (P \rightarrow T))}{\FormulaRefAuto{syl5d}{2,3}}
+\end{tabproof}
+
+\FormulaThm[A nested syllogism deduction]{%
+  P \rightarrow (Q \rightarrow (R \rightarrow S)) \dsep P \rightarrow (S \rightarrow T) \vdash P \rightarrow (Q \rightarrow (R \rightarrow T))%
+}{syl6d}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow S))}{\rA}
+  \proofstep{2}{P \rightarrow (S \rightarrow T)}{\rA}
+  \proofstep{2}{P \rightarrow (Q \rightarrow (S \rightarrow T))}{\FormulaRefAuto{a1d}{2}}
+  \proofstep{1,2}{P \rightarrow (Q \rightarrow (R \rightarrow T))}{\FormulaRefAuto{syldd}{1,3}}
+\end{tabproof}
+
+\FormulaThm[A syllogism rule of inference]{%
+  P \rightarrow (Q \rightarrow (R \rightarrow S)) \dsep S \rightarrow T \vdash P \rightarrow (Q \rightarrow (R \rightarrow T))%
+}{syl8}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow S))}{\rA}
+  \proofstep{2}{S \rightarrow T}{\rA}
+  \proofstep{2}{P \rightarrow (S \rightarrow T)}{\FormulaRefAuto{a1i}{2}}
+  \proofstep{1,2}{P \rightarrow (Q \rightarrow (R \rightarrow T))}{\FormulaRefAuto{syl6d}{1,3}}
+\end{tabproof}
+
+\FormulaThm[A nested syllogism inference with different antecedents]{%
+  P \rightarrow (Q \rightarrow R) \dsep S \rightarrow (R \rightarrow T) \vdash P \rightarrow (S \rightarrow (Q \rightarrow T))%
+}{syl9}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{2}{S \rightarrow (R \rightarrow T)}{\rA}
+  \proofstep{2}{P \rightarrow (S \rightarrow (R \rightarrow T))}{\FormulaRefAuto{a1i}{2}}
+  \proofstep{1,2}{P \rightarrow (S \rightarrow (Q \rightarrow T))}{\FormulaRefAuto{syl5d}{1,3}}
+\end{tabproof}
+
+\FormulaThm[A nested syllogism inference with different antecedents]{%
+  P \rightarrow (Q \rightarrow R) \dsep S \rightarrow (R \rightarrow T) \vdash S \rightarrow (P \rightarrow (Q \rightarrow T))%
+}{syl9r}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{2}{S \rightarrow (R \rightarrow T)}{\rA}
+  \proofstep{1,2}{P \rightarrow (S \rightarrow (Q \rightarrow T))}{\FormulaRefAuto{syl9}{1,2}}
+  \proofstep{1,2}{S \rightarrow (P \rightarrow (Q \rightarrow T))}{\FormulaRefAuto{com12}{3}}
+\end{tabproof}
+
+\FormulaThm[A nested syllogism inference]{%
+  \begin{aligned}[t]
+    &P \rightarrow (Q \rightarrow R)\dsep{}\\
+    &P \rightarrow (Q \rightarrow (S \rightarrow T))\dsep{}\\
+    &R \rightarrow (T \rightarrow U)\vdash{}\\
+    &P \rightarrow (Q \rightarrow (S \rightarrow U))
+  \end{aligned}
+}{syl10}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T\dsep U}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{2}{P \rightarrow (Q \rightarrow (S \rightarrow T))}{\rA}
+  \proofstep{3}{R \rightarrow (T \rightarrow U)}{\rA}
+  \proofstep{1,3}{P \rightarrow (Q \rightarrow (T \rightarrow U))}{\FormulaRefAuto{syl6}{1,3}}
+  \proofstep{1,2,3}{P \rightarrow (Q \rightarrow (S \rightarrow U))}{\FormulaRefAuto{syldd}{2,4}}
+\end{tabproof}
+
+\FormulaThm[Triple deduction introducing an antecedent to a wff]{%
+  P \rightarrow (Q \rightarrow (R \rightarrow S)) \vdash P \rightarrow (Q \rightarrow (R \rightarrow (T \rightarrow S)))%
+}{a1ddd}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow S))}{\rA}
+  \proofstep{}{S \rightarrow (T \rightarrow S)}{\FormulaRefAuto{ax-1}}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow (T \rightarrow S)))}{\FormulaRefAuto{syl8}{1,2}}
+\end{tabproof}
+
+\FormulaThm[Deduction combining antecedents and consequents]{%
+  P \rightarrow (Q \rightarrow R) \dsep P \rightarrow (S \rightarrow T) \vdash P \rightarrow ((R \rightarrow S) \rightarrow (Q \rightarrow T))%
+}{imim12d}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{2}{P \rightarrow (S \rightarrow T)}{\rA}
+  \proofstep{2}{P \rightarrow ((R \rightarrow S) \rightarrow (R \rightarrow T))}{\FormulaRefAuto{imim2d}{2}}
+  \proofstep{1,2}{P \rightarrow ((R \rightarrow S) \rightarrow (Q \rightarrow T))}{\FormulaRefAuto{syl5d}{1,3}}
+\end{tabproof}
+
+\FormulaThm[Deduction adding nested consequents]{%
+  P \rightarrow (Q \rightarrow R) \vdash P \rightarrow ((R \rightarrow S) \rightarrow (Q \rightarrow S))%
+}{imim1d}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\rA}
+  \proofstep{}{P \rightarrow (S \rightarrow S)}{\FormulaRefAuto{idd}}
+  \proofstep{1}{P \rightarrow ((R \rightarrow S) \rightarrow (Q \rightarrow S))}{\FormulaRefAuto{imim12d}{1,2}}
+\end{tabproof}
+
+\FormulaThm[A closed form of syllogism]{%
+  (P \rightarrow Q) \rightarrow ((Q \rightarrow R) \rightarrow (P \rightarrow R))%
+}{imim1}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{}{(P \rightarrow Q) \rightarrow (P \rightarrow Q)}{\FormulaRefAuto{id}}
+  \proofstep{}{(P \rightarrow Q) \rightarrow ((Q \rightarrow R) \rightarrow (P \rightarrow R))}{\FormulaRefAuto{imim1d}{1}}
+\end{tabproof}
+
+\FormulaThm[Theorem pm2.83]{%
+  (P \rightarrow (Q \rightarrow R)) \rightarrow ((P \rightarrow (R \rightarrow S)) \rightarrow (P \rightarrow (Q \rightarrow S)))%
+}{pm2.83}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{}{(Q \rightarrow R) \rightarrow ((R \rightarrow S) \rightarrow (Q \rightarrow S))}{\FormulaRefAuto{imim1}}
+  \proofstep{}{(P \rightarrow (Q \rightarrow R)) \rightarrow ((P \rightarrow (R \rightarrow S)) \rightarrow (P \rightarrow (Q \rightarrow S)))}{\FormulaRefAuto{imim3i}{1}}
+\end{tabproof}
+
+\FormulaThm[Peirce implies Roll]{%
+  \begin{aligned}[t]
+    &(((P \rightarrow Q) \rightarrow P) \rightarrow P)\rightarrow{}\\
+    &\quad (((P \rightarrow Q) \rightarrow R)\rightarrow ((R \rightarrow P) \rightarrow P))
+  \end{aligned}
+}{peirceroll}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{}{%
+    \begin{aligned}[t]
+      &((P \rightarrow Q) \rightarrow R)\rightarrow{}\\
+      &\quad ((R \rightarrow P) \rightarrow ((P \rightarrow Q) \rightarrow P))
+    \end{aligned}
+  }{\FormulaRefAuto{imim1}}
+
+  \proofstep{}{%
+    \begin{aligned}[t]
+      &(((P \rightarrow Q) \rightarrow P) \rightarrow P)\rightarrow{}\\
+      &\quad (((P \rightarrow Q) \rightarrow P) \rightarrow P)
+    \end{aligned}
+  }{\FormulaRefAuto{id}}
+
+  \proofstep{}{%
+    \begin{aligned}[t]
+      &(((P \rightarrow Q) \rightarrow P) \rightarrow P)\rightarrow{}\\
+      &\quad (((P \rightarrow Q) \rightarrow R)\rightarrow ((R \rightarrow P) \rightarrow P))
+    \end{aligned}
+  }{\FormulaRefAuto{syl9r}{1,2}}
+\end{tabproof}
+
+\FormulaThm[Commutation of antecedents. Swap 2nd and 3rd.]{%
+  P \rightarrow (Q \rightarrow (R \rightarrow S)) \vdash P \rightarrow (R \rightarrow (Q \rightarrow S))%
+}{com23}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow S))}{\rA}
+  \proofstep{}{R \rightarrow ((R \rightarrow S) \rightarrow S)}{\FormulaRefAuto{pm2.27}}
+  \proofstep{1}{P \rightarrow (R \rightarrow (Q \rightarrow S))}{\FormulaRefAuto{syl9}{1,2}}
+\end{tabproof}
+
+\FormulaThm[Commutation of antecedents. Rotate right.]{%
+  P \rightarrow (Q \rightarrow (R \rightarrow S)) \vdash R \rightarrow (P \rightarrow (Q \rightarrow S))%
+}{com3r}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow S))}{\rA}
+  \proofstep{1}{P \rightarrow (R \rightarrow (Q \rightarrow S))}{\FormulaRefAuto{com23}{1}}
+  \proofstep{1}{R \rightarrow (P \rightarrow (Q \rightarrow S))}{\FormulaRefAuto{com12}{2}}
+\end{tabproof}
+
+\FormulaThm[Commutation of antecedents. Swap 1st and 3rd.]{%
+  P \rightarrow (Q \rightarrow (R \rightarrow S)) \vdash R \rightarrow (Q \rightarrow (P \rightarrow S))%
+}{com13}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow S))}{\rA}
+  \proofstep{1}{R \rightarrow (P \rightarrow (Q \rightarrow S))}{\FormulaRefAuto{com3r}{1}}
+  \proofstep{1}{R \rightarrow (Q \rightarrow (P \rightarrow S))}{\FormulaRefAuto{com23}{2}}
+\end{tabproof}
+
+\FormulaThm[Commutation of antecedents. Rotate left.]{%
+  P \rightarrow (Q \rightarrow (R \rightarrow S)) \vdash Q \rightarrow (R \rightarrow (P \rightarrow S))%
+}{com3l}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow S))}{\rA}
+  \proofstep{1}{R \rightarrow (P \rightarrow (Q \rightarrow S))}{\FormulaRefAuto{com3r}{1}}
+  \proofstep{1}{Q \rightarrow (R \rightarrow (P \rightarrow S))}{\FormulaRefAuto{com3r}{2}}
+\end{tabproof}
+
+\FormulaThm[Swap antecedents]{%
+  (P \rightarrow (Q \rightarrow R)) \rightarrow (Q \rightarrow (P \rightarrow R))%
+}{pm2.04}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{}{(P \rightarrow (Q \rightarrow R)) \rightarrow (P \rightarrow (Q \rightarrow R))}{\FormulaRefAuto{id}}
+  \proofstep{}{(P \rightarrow (Q \rightarrow R)) \rightarrow (Q \rightarrow (P \rightarrow R))}{\FormulaRefAuto{com23}{1}}
+\end{tabproof}
+
+\FormulaThm[Commutation of antecedents. Swap 3rd and 4th.]{%
+  P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow T))) \vdash P \rightarrow (Q \rightarrow (S \rightarrow (R \rightarrow T)))%
+}{com34}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow T)))}{\rA}
+  \proofstep{}{(R \rightarrow (S \rightarrow T)) \rightarrow (S \rightarrow (R \rightarrow T))}{\FormulaRefAuto{pm2.04}}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (S \rightarrow (R \rightarrow T)))}{\FormulaRefAuto{syl6}{1,2}}
+\end{tabproof}
+
+\FormulaThm[Commutation of antecedents. Rotate left.]{%
+  P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow T))) \vdash Q \rightarrow (R \rightarrow (S \rightarrow (P \rightarrow T)))%
+}{com4l}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow T)))}{\rA}
+  \proofstep{1}{Q \rightarrow (R \rightarrow (P \rightarrow (S \rightarrow T)))}{\FormulaRefAuto{com3l}{1}}
+  \proofstep{1}{Q \rightarrow (R \rightarrow (S \rightarrow (P \rightarrow T)))}{\FormulaRefAuto{com34}{2}}
+\end{tabproof}
+
+\FormulaThm[Commutation of antecedents. Rotate twice.]{%
+  P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow T))) \vdash R \rightarrow (S \rightarrow (P \rightarrow (Q \rightarrow T)))%
+}{com4t}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow T)))}{\rA}
+  \proofstep{1}{Q \rightarrow (R \rightarrow (S \rightarrow (P \rightarrow T)))}{\FormulaRefAuto{com4l}{1}}
+  \proofstep{1}{R \rightarrow (S \rightarrow (P \rightarrow (Q \rightarrow T)))}{\FormulaRefAuto{com4l}{2}}
+\end{tabproof}
+
+\FormulaThm[Commutation of antecedents. Rotate right.]{%
+  P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow T))) \vdash S \rightarrow (P \rightarrow (Q \rightarrow (R \rightarrow T)))%
+}{com4r}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow T)))}{\rA}
+  \proofstep{1}{R \rightarrow (S \rightarrow (P \rightarrow (Q \rightarrow T)))}{\FormulaRefAuto{com4t}{1}}
+  \proofstep{1}{S \rightarrow (P \rightarrow (Q \rightarrow (R \rightarrow T)))}{\FormulaRefAuto{com4l}{2}}
+\end{tabproof}
+
+\FormulaThm[Commutation of antecedents. Swap 2nd and 4th.]{%
+  P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow T))) \vdash P \rightarrow (S \rightarrow (R \rightarrow (Q \rightarrow T)))%
+}{com24}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow T)))}{\rA}
+  \proofstep{1}{R \rightarrow (S \rightarrow (P \rightarrow (Q \rightarrow T)))}{\FormulaRefAuto{com4t}{1}}
+  \proofstep{1}{P \rightarrow (S \rightarrow (R \rightarrow (Q \rightarrow T)))}{\FormulaRefAuto{com13}{2}}
+\end{tabproof}
+
+\FormulaThm[Commutation of antecedents. Swap 1st and 4th.]{%
+  P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow T))) \vdash S \rightarrow (Q \rightarrow (R \rightarrow (P \rightarrow T)))%
+}{com14}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow T)))}{\rA}
+  \proofstep{1}{Q \rightarrow (R \rightarrow (S \rightarrow (P \rightarrow T)))}{\FormulaRefAuto{com4l}{1}}
+  \proofstep{1}{S \rightarrow (Q \rightarrow (R \rightarrow (P \rightarrow T)))}{\FormulaRefAuto{com3r}{2}}
+\end{tabproof}
+
+\FormulaThm[Commutation of antecedents. Swap 4th and 5th.]{%
+  P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow (T \rightarrow U)))) \vdash P \rightarrow (Q \rightarrow (R \rightarrow (T \rightarrow (S \rightarrow U))))%
+}{com45}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T\dsep U}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow (T \rightarrow U))))}{\rA}
+  \proofstep{}{(S \rightarrow (T \rightarrow U)) \rightarrow (T \rightarrow (S \rightarrow U))}{\FormulaRefAuto{pm2.04}}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow (T \rightarrow (S \rightarrow U))))}{\FormulaRefAuto{syl8}{1,2}}
+\end{tabproof}
+
+\FormulaThm[Commutation of antecedents. Swap 3rd and 5th.]{%
+  P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow (T \rightarrow U)))) \vdash P \rightarrow (Q \rightarrow (T \rightarrow (S \rightarrow (R \rightarrow U))))%
+}{com35}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T\dsep U}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow (T \rightarrow U))))}{\rA}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (S \rightarrow (R \rightarrow (T \rightarrow U))))}{\FormulaRefAuto{com34}{1}}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (S \rightarrow (T \rightarrow (R \rightarrow U))))}{\FormulaRefAuto{com45}{2}}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (T \rightarrow (S \rightarrow (R \rightarrow U))))}{\FormulaRefAuto{com34}{3}}
+\end{tabproof}
+
+\FormulaThm[Commutation of antecedents. Swap 2nd and 5th.]{%
+  P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow (T \rightarrow U)))) \vdash P \rightarrow (T \rightarrow (R \rightarrow (S \rightarrow (Q \rightarrow U))))%
+}{com25}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T\dsep U}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow (T \rightarrow U))))}{\rA}
+  \proofstep{1}{P \rightarrow (S \rightarrow (R \rightarrow (Q \rightarrow (T \rightarrow U))))}{\FormulaRefAuto{com24}{1}}
+  \proofstep{1}{P \rightarrow (S \rightarrow (R \rightarrow (T \rightarrow (Q \rightarrow U))))}{\FormulaRefAuto{com45}{2}}
+  \proofstep{1}{P \rightarrow (T \rightarrow (R \rightarrow (S \rightarrow (Q \rightarrow U))))}{\FormulaRefAuto{com24}{3}}
+\end{tabproof}
+
+\FormulaThm[Commutation of antecedents. Rotate left.]{%
+  P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow (T \rightarrow U)))) \vdash Q \rightarrow (R \rightarrow (S \rightarrow (T \rightarrow (P \rightarrow U))))%
+}{com5l}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T\dsep U}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow (T \rightarrow U))))}{\rA}
+  \proofstep{1}{Q \rightarrow (R \rightarrow (S \rightarrow (P \rightarrow (T \rightarrow U))))}{\FormulaRefAuto{com4l}{1}}
+  \proofstep{1}{Q \rightarrow (R \rightarrow (S \rightarrow (T \rightarrow (P \rightarrow U))))}{\FormulaRefAuto{com45}{2}}
+\end{tabproof}
+
+\FormulaThm[Commutation of antecedents. Swap 1st and 5th.]{%
+  \begin{aligned}[t]
+    &P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow (T \rightarrow U))))\vdash{}\\
+    &\quad T \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow (P \rightarrow U))))
+  \end{aligned}
+}{com15}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T\dsep U}%
+}
+\begin{tabproof}
+  \proofstep{1}{%
+    \begin{aligned}[t]
+      &P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow (T \rightarrow U))))
+    \end{aligned}
+  }{\rA}
+  \proofstep{1}{%
+    \begin{aligned}[t]
+      &Q \rightarrow (R \rightarrow (S \rightarrow (T \rightarrow (P \rightarrow U))))
+    \end{aligned}
+  }{\FormulaRefAuto{com5l}{1}}
+  \proofstep{1}{%
+    \begin{aligned}[t]
+      &T \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow (P \rightarrow U))))
+    \end{aligned}
+  }{\FormulaRefAuto{com4r}{2}}
+\end{tabproof}
+
+\FormulaThm[Commutation of antecedents. Rotate left twice.]{%
+  \begin{aligned}[t]
+    &P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow (T \rightarrow U))))\vdash{}\\
+    &\quad R \rightarrow (S \rightarrow (T \rightarrow (P \rightarrow (Q \rightarrow U))))
+  \end{aligned}
+}{com52l}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T\dsep U}%
+}
+\begin{tabproof}
+  \proofstep{1}{%
+    \begin{aligned}[t]
+      &P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow (T \rightarrow U))))
+    \end{aligned}
+  }{\rA}
+  \proofstep{1}{%
+    \begin{aligned}[t]
+      &Q \rightarrow (R \rightarrow (S \rightarrow (T \rightarrow (P \rightarrow U))))
+    \end{aligned}
+  }{\FormulaRefAuto{com5l}{1}}
+  \proofstep{1}{%
+    \begin{aligned}[t]
+      &R \rightarrow (S \rightarrow (T \rightarrow (P \rightarrow (Q \rightarrow U))))
+    \end{aligned}
+  }{\FormulaRefAuto{com5l}{2}}
+\end{tabproof}
+
+\FormulaThm[Commutation of antecedents. Rotate right twice.]{%
+  \begin{aligned}[t]
+    &P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow (T \rightarrow U))))\vdash{}\\
+    &\quad S \rightarrow (T \rightarrow (P \rightarrow (Q \rightarrow (R \rightarrow U))))
+  \end{aligned}
+}{com52r}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T\dsep U}%
+}
+\begin{tabproof}
+  \proofstep{1}{%
+    \begin{aligned}[t]
+      &P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow (T \rightarrow U))))
+    \end{aligned}
+  }{\rA}
+  \proofstep{1}{%
+    \begin{aligned}[t]
+      &R \rightarrow (S \rightarrow (T \rightarrow (P \rightarrow (Q \rightarrow U))))
+    \end{aligned}
+  }{\FormulaRefAuto{com52l}{1}}
+  \proofstep{1}{%
+    \begin{aligned}[t]
+      &S \rightarrow (T \rightarrow (P \rightarrow (Q \rightarrow (R \rightarrow U))))
+    \end{aligned}
+  }{\FormulaRefAuto{com5l}{2}}
+\end{tabproof}
+
+\FormulaThm[Commutation of antecedents. Rotate right.]{%
+  \begin{aligned}[t]
+    &P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow (T \rightarrow U))))\vdash{}\\
+    &\quad T \rightarrow (P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow U))))
+  \end{aligned}
+}{com5r}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S\dsep T\dsep U}%
+}
+\begin{tabproof}
+  \proofstep{1}{%
+    \begin{aligned}[t]
+      &P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow (T \rightarrow U))))
+    \end{aligned}
+  }{\rA}
+  \proofstep{1}{%
+    \begin{aligned}[t]
+      &R \rightarrow (S \rightarrow (T \rightarrow (P \rightarrow (Q \rightarrow U))))
+    \end{aligned}
+  }{\FormulaRefAuto{com52l}{1}}
+  \proofstep{1}{%
+    \begin{aligned}[t]
+      &T \rightarrow (P \rightarrow (Q \rightarrow (R \rightarrow (S \rightarrow U))))
+    \end{aligned}
+  }{\FormulaRefAuto{com52l}{2}}
+\end{tabproof}
+
+\FormulaThm[Closed form of imim12i and of 3syl]{%
+  ((P \rightarrow Q) \rightarrow ((R \rightarrow S) \rightarrow ((Q \rightarrow R) \rightarrow (P \rightarrow S))))
+}{imim12}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{}{%
+    (R \rightarrow S) \rightarrow ((Q \rightarrow R) \rightarrow (Q \rightarrow S))
+  }{\FormulaRefAuto{imim2}}
+  \proofstep{}{%
+    (P \rightarrow Q) \rightarrow ((Q \rightarrow S) \rightarrow (P \rightarrow S))
+  }{\FormulaRefAuto{imim1}}
+  \proofstep{}{%
+    ((P \rightarrow Q) \rightarrow ((R \rightarrow S) \rightarrow ((Q \rightarrow R) \rightarrow (P \rightarrow S))))
+  }{\FormulaRefAuto{syl9r}{1,2}}
+\end{tabproof}
+
+\FormulaThm[Elimination of a nested antecedent]{%
+  (((P \rightarrow Q) \rightarrow R) \rightarrow (Q \rightarrow R))
+}{jarr}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{}{Q \rightarrow (P \rightarrow Q)}{\FormulaRefAuto{ax-1}}
+  \proofstep{}{(((P \rightarrow Q) \rightarrow R) \rightarrow (Q \rightarrow R))}{\FormulaRefAuto{imim1i}{1}}
+\end{tabproof}
+
+\begin{remark}
+\FormulaRefAuto{jarr} ist eine Kürzungsregel: der zusätzliche Antezedens \((P \rightarrow Q)\) verschwindet.
+\end{remark}
+
+\FormulaThm[Inference associated with jarr]{%
+  ((P \rightarrow Q) \rightarrow R) \vdash Q \rightarrow R
+}{jarri}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{}{Q \rightarrow (P \rightarrow Q)}{\FormulaRefAuto{ax-1}}
+  \proofstep{2}{(P \rightarrow Q) \rightarrow R}{\rA}
+  \proofstep{2}{Q \rightarrow R}{\FormulaRefAuto{syl}{1,2}}
+\end{tabproof}
+
+\FormulaThm[Deduction associated with pm2.86]{%
+  P \rightarrow ((Q \rightarrow R) \rightarrow (Q \rightarrow S)) \vdash P \rightarrow (Q \rightarrow (R \rightarrow S))
+}{pm2.86d}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R\dsep S}%
+}
+\begin{tabproof}
+  \proofstep{}{R \rightarrow (Q \rightarrow R)}{\FormulaRefAuto{ax-1}}
+  \proofstep{2}{P \rightarrow ((Q \rightarrow R) \rightarrow (Q \rightarrow S))}{\rA}
+  \proofstep{2}{P \rightarrow (R \rightarrow (Q \rightarrow S))}{\FormulaRefAuto{syl5}{1,2}}
+  \proofstep{2}{P \rightarrow (Q \rightarrow (R \rightarrow S))}{\FormulaRefAuto{com23}{3}}
+\end{tabproof}
+
+\FormulaThm[Converse of Axiom ax-2]{%
+  (((P \rightarrow Q) \rightarrow (P \rightarrow R)) \rightarrow (P \rightarrow (Q \rightarrow R)))
+}{pm2.86}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{}{%
+    ((P \rightarrow Q) \rightarrow (P \rightarrow R))
+    \rightarrow
+    ((P \rightarrow Q) \rightarrow (P \rightarrow R))
+  }{\FormulaRefAuto{id}}
+  \proofstep{}{%
+    (((P \rightarrow Q) \rightarrow (P \rightarrow R)) \rightarrow (P \rightarrow (Q \rightarrow R)))
+  }{\FormulaRefAuto{pm2.86d}{1}}
+\end{tabproof}
+
+\begin{remark}
+\FormulaRefAuto{pm2.86} ist die Umkehrung von \FormulaRefAuto{ax-2}: ein gemeinsames Antezedens wird wieder in eine verschachtelte Implikation eingezogen.
+\end{remark}
+
+\FormulaThm[Inference associated with pm2.86]{%
+  ((P \rightarrow Q) \rightarrow (P \rightarrow R)) \vdash P \rightarrow (Q \rightarrow R)
+}{pm2.86i}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{(P \rightarrow Q) \rightarrow (P \rightarrow R)}{\rA}
+  \proofstep{1}{Q \rightarrow (P \rightarrow R)}{\FormulaRefAuto{jarri}{1}}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\FormulaRefAuto{com12}{2}}
+\end{tabproof}
+
+\FormulaThm[The Linearity Axiom of Lukasiewicz]{%
+  (((P \rightarrow Q) \rightarrow (Q \rightarrow P)) \rightarrow (Q \rightarrow P))
+}{loolin}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{}{%
+    (((P \rightarrow Q) \rightarrow (Q \rightarrow P)) \rightarrow (Q \rightarrow (Q \rightarrow P)))
+  }{\FormulaRefAuto{jarr}}
+  \proofstep{}{%
+    (((P \rightarrow Q) \rightarrow (Q \rightarrow P)) \rightarrow (Q \rightarrow P))
+  }{\FormulaRefAuto{pm2.43d}{1}}
+\end{tabproof}
+\begin{remark}
+\FormulaRefAuto{loolin} gehört nicht zum eigentlichen Kern der hier benutzten Axiomatik, sondern erscheint als in unserem Kalkül beweisbare Form eines Axioms der unendlichwertigen Aussagenlogik von Łukasiewicz. Der Satz ist deshalb besonders als Vergleich zwischen verschiedenen Aussagenkalkülen aufschlussreich.
+\end{remark}
+
+\FormulaThm[An alternate for the Linearity Axiom of Lukasiewicz]{%
+  (((P \rightarrow Q) \rightarrow (P \rightarrow R)) \rightarrow ((Q \rightarrow P) \rightarrow (Q \rightarrow R)))
+}{loowoz}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{}{%
+    (((P \rightarrow Q) \rightarrow (P \rightarrow R)) \rightarrow (Q \rightarrow (P \rightarrow R)))
+  }{\FormulaRefAuto{jarr}}
+  \proofstep{}{%
+    (((P \rightarrow Q) \rightarrow (P \rightarrow R)) \rightarrow ((Q \rightarrow P) \rightarrow (Q \rightarrow R)))
+  }{\FormulaRefAuto{a2d}{1}}
+\end{tabproof}
+
+\section{Logical negation}
+
+
+\FormulaThm[Alias for ax-3]{%
+  ((\neg P \rightarrow \neg Q) \rightarrow (Q \rightarrow P))
+}{con4}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{}{(\neg P \rightarrow \neg Q) \rightarrow (Q \rightarrow P)}{\FormulaRefAuto{ax-3}}
+\end{tabproof}
+\begin{remark}
+\FormulaRefAuto{con4} ist die Negationsform von \FormulaRefAuto{ax-3} und markiert den eigentlichen Einstieg in die klassische Negationslogik.
+\end{remark}
+
+\FormulaThm[Inference associated with con4]{%
+  (\neg P \rightarrow \neg Q) \vdash Q \rightarrow P
+}{con4i}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{1}{\neg P \rightarrow \neg Q}{\rA}
+  \proofstep{}{(\neg P \rightarrow \neg Q) \rightarrow (Q \rightarrow P)}{\FormulaRefAuto{con4}}
+  \proofstep{1}{Q \rightarrow P}{\FormulaRefAuto{ax-mp}{1,2}}
+\end{tabproof}
+\begin{remark}
+Metamath vermerkt zu \FormulaRefAuto{con4i} einen kürzeren Beweis über \FormulaRefAuto{notnot} und \FormulaRefAuto{nsyl2}. Der hier naheliegende Zugang über \FormulaRefAuto{con4} ist jedoch für den Aufbau des Abschnitts günstiger, weil er ohne spätere Sätze über die Doppelnegation auskommt.
+\end{remark}
+
+
+\FormulaThm[Deduction associated with con4]{%
+  P \rightarrow (\neg Q \rightarrow \neg R) \vdash P \rightarrow (R \rightarrow Q)
+}{con4d}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow (\neg Q \rightarrow \neg R)}{\rA}
+  \proofstep{}{(\neg Q \rightarrow \neg R) \rightarrow (R \rightarrow Q)}{\FormulaRefAuto{con4}}
+  \proofstep{1}{P \rightarrow (R \rightarrow Q)}{\FormulaRefAuto{syl}{1,2}}
+\end{tabproof}
+
+\FormulaThm[The rule of modus tollens]{%
+  P \dsep \neg Q \rightarrow \neg P \vdash Q
+}{mt4}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{1}{P}{\rA}
+  \proofstep{2}{\neg Q \rightarrow \neg P}{\rA}
+  \proofstep{2}{P \rightarrow Q}{\FormulaRefAuto{con4i}{2}}
+  \proofstep{1,2}{Q}{\FormulaRefAuto{ax-mp}{1,3}}
+\end{tabproof}
+
+\FormulaThm[Modus tollens deduction]{%
+  P \rightarrow Q \dsep P \rightarrow (\neg R \rightarrow \neg Q) \vdash P \rightarrow R
+}{mt4d}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{2}{P \rightarrow (\neg R \rightarrow \neg Q)}{\rA}
+  \proofstep{2}{P \rightarrow (Q \rightarrow R)}{\FormulaRefAuto{con4d}{2}}
+  \proofstep{1,2}{P \rightarrow R}{\FormulaRefAuto{mpd}{1,3}}
+\end{tabproof}
+
+\FormulaThm[Modus tollens inference]{%
+  R \dsep P \rightarrow (\neg Q \rightarrow \neg R) \vdash P \rightarrow Q
+}{mt4i}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{R}{\rA}
+  \proofstep{1}{P \rightarrow R}{\FormulaRefAuto{a1i}{1}}
+  \proofstep{2}{P \rightarrow (\neg Q \rightarrow \neg R)}{\rA}
+  \proofstep{1,2}{P \rightarrow Q}{\FormulaRefAuto{mt4d}{1,3}}
+\end{tabproof}
+
+\FormulaThm[A contradiction implies anything]{%
+  \neg P \vdash P \rightarrow Q
+}{pm2.21i}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{1}{\neg P}{\rA}
+  \proofstep{1}{\neg Q \rightarrow \neg P}{\FormulaRefAuto{a1i}{1}}
+  \proofstep{1}{P \rightarrow Q}{\FormulaRefAuto{con4i}{2}}
+\end{tabproof}
+\begin{remark}
+\FormulaRefAuto{pm2.21} ist das Duns-Scotus-Gesetz: aus einem Widerspruch folgt jede Aussage.
+\end{remark}
+
+\FormulaThm[A contradiction implies anything]{%
+  P \dsep \neg P \vdash Q
+}{pm2.24ii}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{1}{P}{\rA}
+  \proofstep{2}{\neg P}{\rA}
+  \proofstep{2}{P \rightarrow Q}{\FormulaRefAuto{pm2.21i}{2}}
+  \proofstep{1,2}{Q}{\FormulaRefAuto{ax-mp}{1,3}}
+\end{tabproof}
+
+\FormulaThm[A contradiction implies anything]{%
+  P \rightarrow \neg Q \vdash P \rightarrow (Q \rightarrow R)
+}{pm2.21d}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow \neg Q}{\rA}
+  \proofstep{1}{P \rightarrow (\neg R \rightarrow \neg Q)}{\FormulaRefAuto{a1d}{1}}
+  \proofstep{1}{P \rightarrow (Q \rightarrow R)}{\FormulaRefAuto{con4d}{2}}
+\end{tabproof}
+
+\FormulaThm[Alternate proof of pm2.21dd]{%
+  P \rightarrow Q \dsep P \rightarrow \neg Q \vdash P \rightarrow R
+}{pm2.21ddALT}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{2}{P \rightarrow \neg Q}{\rA}
+  \proofstep{2}{P \rightarrow (Q \rightarrow R)}{\FormulaRefAuto{pm2.21d}{2}}
+  \proofstep{1,2}{P \rightarrow R}{\FormulaRefAuto{mpd}{1,3}}
+\end{tabproof}
+
+\FormulaThm[From a wff and its negation, anything follows]{%
+  (\neg P \rightarrow (P \rightarrow Q))
+}{pm2.21}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{}{\neg P \rightarrow \neg P}{\FormulaRefAuto{id}}
+  \proofstep{}{(\neg P \rightarrow (P \rightarrow Q))}{\FormulaRefAuto{pm2.21d}{1}}
+\end{tabproof}
+
+\FormulaThm[Commuted form of pm2.21]{%
+  (P \rightarrow (\neg P \rightarrow Q))
+}{pm2.24}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{}{(\neg P \rightarrow (P \rightarrow Q))}{\FormulaRefAuto{pm2.21}}
+  \proofstep{}{(P \rightarrow (\neg P \rightarrow Q))}{\FormulaRefAuto{com12}{1}}
+\end{tabproof}
+
+\FormulaThm[Elimination of a nested antecedent]{%
+  (((P \rightarrow Q) \rightarrow R) \rightarrow (\neg P \rightarrow R))
+}{jarl}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{}{(\neg P \rightarrow (P \rightarrow Q))}{\FormulaRefAuto{pm2.21}}
+  \proofstep{}{(((P \rightarrow Q) \rightarrow R) \rightarrow (\neg P \rightarrow R))}{\FormulaRefAuto{imim1i}{1}}
+\end{tabproof}
+\begin{remark}
+\FormulaRefAuto{jarl} ist das negationslogische Gegenstück zu \FormulaRefAuto{jarr}. Statt aus \(Q\) wird hier aus \(\neg P\) auf \(R\) geschlossen. Der Satz ist nützlich, wenn ein verschachtelter Vordersatz \((P \rightarrow Q)\) unter einer Widerlegungsannahme über \(P\) beseitigt werden soll.
+\end{remark}
+
+\FormulaThm[Inference associated with jarl]{%
+  ((P \rightarrow Q) \rightarrow R) \vdash \neg P \rightarrow R
+}{jarli}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{}{(\neg P \rightarrow (P \rightarrow Q))}{\FormulaRefAuto{pm2.21}}
+  \proofstep{1}{(P \rightarrow Q) \rightarrow R}{\rA}
+  \proofstep{1}{\neg P \rightarrow R}{\FormulaRefAuto{syl}{1,2}}
+\end{tabproof}
+
+\FormulaThm[Deduction form of the Clavius law]{%
+  P \rightarrow (\neg Q \rightarrow Q) \vdash P \rightarrow Q
+}{pm2.18d}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{}{P \rightarrow P}{\FormulaRefAuto{id}}
+  \proofstep{2}{P \rightarrow (\neg Q \rightarrow Q)}{\rA}
+  \proofstep{}{(\neg Q \rightarrow (Q \rightarrow \neg P))}{\FormulaRefAuto{pm2.21}}
+  \proofstep{2}{P \rightarrow (\neg Q \rightarrow \neg P)}{\FormulaRefAuto{sylcom}{2,3}}
+  \proofstep{2}{P \rightarrow Q}{\FormulaRefAuto{mt4d}{1,4}}
+\end{tabproof}
+
+\FormulaThm[Clavius law]{%
+  ((\neg P \rightarrow P) \rightarrow P)
+}{pm2.18}{%
+  \DeltaRow{Propositions}{P}%
+}
+\begin{tabproof}
+  \proofstep{}{(\neg P \rightarrow P) \rightarrow (\neg P \rightarrow P)}{\FormulaRefAuto{id}}
+  \proofstep{}{((\neg P \rightarrow P) \rightarrow P)}{\FormulaRefAuto{pm2.18d}{1}}
+\end{tabproof}
+\begin{remark}
+\FormulaRefAuto{pm2.18} ist das Clavius-Gesetz und rechtfertigt Beweise durch Widerspruch.
+\end{remark}
+
+\FormulaThm[Inference associated with the Clavius law]{%
+  (\neg P \rightarrow P) \vdash P
+}{pm2.18i}{%
+  \DeltaRow{Propositions}{P}%
+}
+\begin{tabproof}
+  \proofstep{1}{\neg P \rightarrow P}{\rA}
+  \proofstep{}{(\neg P \rightarrow P) \rightarrow P}{\FormulaRefAuto{pm2.18}}
+  \proofstep{1}{P}{\FormulaRefAuto{ax-mp}{1,2}}
+\end{tabproof}
+
+\FormulaThm[Double negation elimination]{%
+  (\neg \neg P \rightarrow P)
+}{notnotr}{%
+  \DeltaRow{Propositions}{P}%
+}
+\begin{tabproof}
+  \proofstep{}{((\neg P \rightarrow P) \rightarrow P)}{\FormulaRefAuto{pm2.18}}
+  \proofstep{}{(\neg \neg P \rightarrow P)}{\FormulaRefAuto{jarli}{1}}
+\end{tabproof}
+
+\FormulaThm[Inference associated with notnotr]{%
+  \neg \neg P \vdash P
+}{notnotri}{%
+  \DeltaRow{Propositions}{P}%
+}
+\begin{tabproof}
+  \proofstep{1}{\neg \neg P}{\rA}
+  \proofstep{1}{\neg P \rightarrow \neg \neg \neg P}{\FormulaRefAuto{pm2.21i}{1}}
+  \proofstep{1}{P}{\FormulaRefAuto{mt4}{1,2}}
+\end{tabproof}
+\begin{remark}
+\FormulaRefAuto{notnotr} ist klassisch, aber nicht intuitionistisch allgemein gültig.
+\end{remark}
+
+\FormulaThm[Alternate proof of notnotri]{%
+  \neg \neg P \vdash P
+}{notnotriALT}{%
+  \DeltaRow{Propositions}{P}%
+}
+\begin{tabproof}
+  \proofstep{1}{\neg \neg P}{\rA}
+  \proofstep{1}{\neg P \rightarrow P}{\FormulaRefAuto{pm2.21i}{1}}
+  \proofstep{1}{P}{\FormulaRefAuto{pm2.18i}{2}}
+\end{tabproof}
+
+\FormulaThm[Deduction associated with notnotr]{%
+  P \rightarrow \neg \neg Q \vdash P \rightarrow Q
+}{notnotrd}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow \neg \neg Q}{\rA}
+  \proofstep{}{(\neg \neg Q \rightarrow Q)}{\FormulaRefAuto{notnotr}}
+  \proofstep{1}{P \rightarrow Q}{\FormulaRefAuto{syl}{1,2}}
+\end{tabproof}
+
+\FormulaThm[A contraposition deduction]{%
+  P \rightarrow (Q \rightarrow \neg R) \vdash P \rightarrow (R \rightarrow \neg Q)
+}{con2d}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{}{(\neg \neg Q \rightarrow Q)}{\FormulaRefAuto{notnotr}}
+  \proofstep{2}{P \rightarrow (Q \rightarrow \neg R)}{\rA}
+  \proofstep{2}{P \rightarrow (\neg \neg Q \rightarrow \neg R)}{\FormulaRefAuto{syl5}{1,2}}
+  \proofstep{2}{P \rightarrow (R \rightarrow \neg Q)}{\FormulaRefAuto{con4d}{3}}
+\end{tabproof}
+
+\FormulaThm[Contraposition]{%
+  ((P \rightarrow \neg Q) \rightarrow (Q \rightarrow \neg P))
+}{con2}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{}{(P \rightarrow \neg Q) \rightarrow (P \rightarrow \neg Q)}{\FormulaRefAuto{id}}
+  \proofstep{}{((P \rightarrow \neg Q) \rightarrow (Q \rightarrow \neg P))}{\FormulaRefAuto{con2d}{1}}
+\end{tabproof}
+\begin{remark}
+\FormulaRefAuto{con2} ist die klassische Kontraposition in reiner Implikationsform. Viele spätere Negationsschlüsse, insbesondere \FormulaRefAuto{mt2d}, \FormulaRefAuto{nsyl} und \FormulaRefAuto{nsyl2}, lassen sich als Anwendungen genau dieses Grundmusters lesen.
+\end{remark}
+
+\FormulaThm[Modus tollens deduction]{%
+  P \rightarrow R \dsep P \rightarrow (Q \rightarrow \neg R) \vdash P \rightarrow \neg Q
+}{mt2d}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow R}{\rA}
+  \proofstep{2}{P \rightarrow (Q \rightarrow \neg R)}{\rA}
+  \proofstep{2}{P \rightarrow (R \rightarrow \neg Q)}{\FormulaRefAuto{con2d}{2}}
+  \proofstep{1,2}{P \rightarrow \neg Q}{\FormulaRefAuto{mpd}{1,3}}
+\end{tabproof}
+
+\FormulaThm[Modus tollens inference]{%
+  R \dsep P \rightarrow (Q \rightarrow \neg R) \vdash P \rightarrow \neg Q
+}{mt2i}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{R}{\rA}
+  \proofstep{1}{P \rightarrow R}{\FormulaRefAuto{a1i}{1}}
+  \proofstep{2}{P \rightarrow (Q \rightarrow \neg R)}{\rA}
+  \proofstep{1,2}{P \rightarrow \neg Q}{\FormulaRefAuto{mt2d}{2,3}}
+\end{tabproof}
+
+\FormulaThm[A negated syllogism inference]{%
+  P \rightarrow \neg Q \dsep R \rightarrow Q \vdash R \rightarrow \neg P
+}{nsyl3}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{R \rightarrow Q}{\rA}
+  \proofstep{2}{P \rightarrow \neg Q}{\rA}
+  \proofstep{2}{R \rightarrow (P \rightarrow \neg Q)}{\FormulaRefAuto{a1i}{2}}
+  \proofstep{1,2}{R \rightarrow \neg P}{\FormulaRefAuto{mt2d}{1,3}}
+\end{tabproof}
+
+\FormulaThm[A contraposition inference]{%
+  P \rightarrow \neg Q \vdash Q \rightarrow \neg P
+}{con2i}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow \neg Q}{\rA}
+  \proofstep{}{Q \rightarrow Q}{\FormulaRefAuto{id}}
+  \proofstep{1}{Q \rightarrow \neg P}{\FormulaRefAuto{nsyl3}{1,2}}
+\end{tabproof}
+
+\FormulaThm[A negated syllogism inference]{%
+  P \rightarrow \neg Q \dsep R \rightarrow Q \vdash P \rightarrow \neg R
+}{nsyl}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow \neg Q}{\rA}
+  \proofstep{2}{R \rightarrow Q}{\rA}
+  \proofstep{1,2}{R \rightarrow \neg P}{\FormulaRefAuto{nsyl3}{1,2}}
+  \proofstep{1,2}{P \rightarrow \neg R}{\FormulaRefAuto{con2i}{3}}
+\end{tabproof}
+
+\FormulaThm[A negated syllogism inference]{%
+  P \rightarrow \neg Q \dsep \neg R \rightarrow Q \vdash P \rightarrow R
+}{nsyl2}{%
+  \DeltaRow{Propositions}{P\dsep Q\dsep R}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow \neg Q}{\rA}
+  \proofstep{2}{\neg R \rightarrow Q}{\rA}
+  \proofstep{1,2}{\neg R \rightarrow \neg P}{\FormulaRefAuto{nsyl3}{1,2}}
+  \proofstep{1,2}{P \rightarrow R}{\FormulaRefAuto{con4i}{3}}
+\end{tabproof}
+
+\FormulaThm[Double negation introduction]{%
+  (P \rightarrow \neg \neg P)
+}{notnot}{%
+  \DeltaRow{Propositions}{P}%
+}
+\begin{tabproof}
+  \proofstep{}{\neg P \rightarrow \neg P}{\FormulaRefAuto{id}}
+  \proofstep{}{P \rightarrow \neg \neg P}{\FormulaRefAuto{con2i}{1}}
+\end{tabproof}
+\begin{remark}
+Zusammen mit \FormulaRefAuto{notnotr} liefert \FormulaRefAuto{notnot} die in der klassischen Logik gültige Äquivalenz zwischen \(P\) und \(\neg\neg P\). Im Unterschied zu \FormulaRefAuto{notnotr} ist diese Einführungsrichtung auch intuitionistisch unproblematisch.
+\end{remark}
+
+\FormulaThm[Inference associated with notnot]{%
+  P \vdash \neg \neg P
+}{notnoti}{%
+  \DeltaRow{Propositions}{P}%
+}
+\begin{tabproof}
+  \proofstep{1}{P}{\rA}
+  \proofstep{}{P \rightarrow \neg \neg P}{\FormulaRefAuto{notnot}}
+  \proofstep{1}{\neg \neg P}{\FormulaRefAuto{ax-mp}{1,2}}
+\end{tabproof}
+
+\FormulaThm[Deduction associated with notnot]{%
+  P \rightarrow Q \vdash P \rightarrow \neg \neg Q
+}{notnotd}{%
+  \DeltaRow{Propositions}{P\dsep Q}%
+}
+\begin{tabproof}
+  \proofstep{1}{P \rightarrow Q}{\rA}
+  \proofstep{}{Q \rightarrow \neg \neg Q}{\FormulaRefAuto{notnot}}
+  \proofstep{1}{P \rightarrow \neg \neg Q}{\FormulaRefAuto{syl}{1,2}}
+\end{tabproof}
+
+
+\PrintFormulaStackById
+
+\end{document}

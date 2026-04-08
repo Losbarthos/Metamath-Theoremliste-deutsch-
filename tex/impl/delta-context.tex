@@ -1,0 +1,66 @@
+% tex/impl/delta-context.tex
+\RequirePackage{xparse}
+\RequirePackage{array}
+
+% Optional: Styling zentral anpassbar
+\newcommand{\DeltaLabelStyle}[1]{\textbf{#1}}
+\newcommand{\DeltaNoteStyle}[1]{#1}
+
+% ------------------------------------------------------------
+% \DeltaRow{Label}{Math-Inhalt}[Optional: Notiz/Referenz]
+% - 2. Spalte ist (durch Tabellenspaltenformat) Mathematik
+% - 3. Spalte ist Text/Notiz (z.B. \FormulaRefAuto{...})
+% ------------------------------------------------------------
+\ExplSyntaxOn
+\NewDocumentCommand{\DeltaRow}{m m O{}}{%
+  \tl_if_blank:nTF {#1}
+    {%
+      & #2 & \DeltaNoteStyle{#3} \\[-2pt]%
+    }{%
+      \DeltaLabelStyle{#1:} & #2 & \DeltaNoteStyle{#3} \\[-2pt]%
+    }%
+}
+\ExplSyntaxOff
+
+% tex/impl/delta-context.tex  (direkt nach \NewDocumentCommand{\DeltaRow}...)
+
+\NewDocumentCommand{\DeltaDecl}{m m O{}}{%
+  \DeltaRow{#1}{#2}[#3]%
+}
+
+\NewDocumentCommand{\DeltaPrem}{m m O{}}{%
+  \DeltaRow{#1}{\triangleright\,#2}[#3]%
+}
+
+
+
+% ------------------------------------------------------------
+% DeltaContext: mit Überschrift
+% ------------------------------------------------------------
+% ------------------------------------------------------------
+% DeltaContext: mit Überschrift
+% ------------------------------------------------------------
+\NewDocumentEnvironment{DeltaContext}{m}{%
+  \par\medskip
+  \noindent\DeltaLabelStyle{#1}\par\smallskip
+  \noindent\begin{tabular}{@{}l@{\quad}>{$}l<{$}@{\quad}l@{}}%
+}{%
+  \end{tabular}%
+  \par\medskip
+}
+
+
+% ------------------------------------------------------------
+% DeltaBlockFromRows: ohne Überschrift
+% ------------------------------------------------------------
+\NewDocumentCommand{\DeltaBlockFromRows}{m}{%
+  \par\smallskip
+  % Nach amsthm-Kopf sicher in neue Zeile (nur wenn wir schon in hmode sind)
+  \ifhmode\newline\fi
+  \noindent
+  \begin{tabular}{@{}l@{\quad}>{$}l<{$}@{\quad}l@{}}%
+    #1%
+  \end{tabular}%
+  \par\smallskip
+}
+

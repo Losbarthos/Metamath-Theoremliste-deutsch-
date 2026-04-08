@@ -1,0 +1,79 @@
+\documentclass[a4paper,11pt]{report}
+
+\usepackage[german]{babel}
+\usepackage{csquotes}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+\usepackage{subfiles}
+\usepackage{xparse}
+\usepackage{mathtools} % für \coloneqq
+\usepackage{booktabs}  % für \toprule, \midrule, \bottomrule
+\usepackage{tabularx}  % für tabularx-Umgebung
+\usepackage{makecell}
+
+% erst amsthm (falls formula-envs.tex es nicht selbst lädt; doppelt ist meist ok, aber sauber ist einmal)
+\usepackage{amsthm}
+\usepackage{xparse}
+\usepackage{multirow}
+\usepackage{microtype}
+
+
+\input{tex/impl/thmlookup.tex}
+\input{tex/impl/formula-envs.tex}
+\input{tex/impl/proof-tables.tex} 
+\input{tex/impl/commands.tex}
+
+% Verhindert Seitenumbruch innerhalb eines Regelschemas
+\newenvironment{RuleSchema}{\begin{samepage}}{\end{samepage}}
+
+\newcounter{file}
+
+% --- thmlookup: pro Band in eigene Dateien schreiben ---
+\directlua{
+  function thmlookup.set_band_output(tag)
+    local base = "registry/_" .. tag
+    local reg  = base .. ".registry.tsv"
+    local dbg  = base .. ".debug.log"
+
+    -- WICHTIG: alte Band-Registry in den Speicher laden (cross-band lookup)
+    thmlookup.load_registry_file(reg)
+
+    -- Output dieses Laufs in genau diese Dateien schreiben
+    thmlookup.registry_path = reg
+    thmlookup.debug_path    = dbg
+
+    -- Dateien für diesen Lauf leeren/neu anlegen
+    local f = io.open(thmlookup.registry_path, "w"); if f then f:write(""); f:close() end
+    local g = io.open(thmlookup.debug_path, "w");    if g then g:write(""); g:close() end
+
+    texio.write_nl("thmlookup: output -> " .. thmlookup.registry_path)
+  end
+}
+
+
+
+% --- Warnschwellen ---
+\hbadness=10000
+\vbadness=10000
+\hfuzz=1pt
+\vfuzz=1pt
+
+
+\usepackage{silence}
+\WarningFilter{latex}{Command \showhyphens has changed}
+
+\begin{document}
+
+%\ThmLookupBand{B01}
+\subfile{B01}
+
+\clearpage
+%\ThmLookupBand{B02}
+\subfile{B02}
+
+\clearpage
+%\ThmLookupBand{B03}
+\subfile{B03}
+
+
+\end{document}

@@ -1,0 +1,42 @@
+% tex/impl/commands/logic.tex
+\ProvidesFile{logic.tex}[2026/01/04 Logical separators and symbols]
+
+% ------------------------------------------------------------------
+% Trennzeichen für Annahmen (dein \dsep)
+% ------------------------------------------------------------------
+\providecommand{\dsep}{,\allowbreak\ }
+
+% ------------------------------------------------------------------
+% Äquivalenz im Kalkül (dein \eqvdash)
+% ------------------------------------------------------------------
+\providecommand{\eqvdash}{\dashv\vdash}
+
+% ------------------------------------------------------------------
+% XOR (falls du es als Operator nutzt)
+% ------------------------------------------------------------------
+\providecommand*\lxor{\mathbin{\veebar}}
+
+% ------------------------------------------------------------------
+% Optional: kleine Hilfsmakros, die du häufig in Formeln brauchst
+% (nur aufnehmen, wenn du sie wirklich verwendest)
+% ------------------------------------------------------------------
+\providecommand{\st}{\,\middle|\,} % für Mengenschreibweise {x \in A \st P(x)}
+
+% ------------------------------------------------------------------
+% Optional: konsistente Klammer-Makros (falls du das magst)
+% ------------------------------------------------------------------
+\providecommand{\paren}[1]{\ensuremath{\left(#1\right)}}
+\providecommand{\brak}[1]{\ensuremath{\left[#1\right]}}
+\providecommand{\set}[1]{\ensuremath{\left\{#1\right\}}}
+\providecommand{\st}{\ensuremath{\,\middle|\,}}
+
+% Fallunterscheidungs-Term (Piecewise-Notation)
+% \IfThenElse{P}{a}{b}  bedeutet:  { a falls P ; b falls ¬P }
+\NewDocumentCommand{\IfThenElse}{m m m}{%
+  \ensuremath{%
+    \left\{\begin{array}{@{}ll@{}}
+      #2, & \text{falls } #1\\
+      #3, & \text{falls } \neg #1
+    \end{array}\right.%
+  }%
+}

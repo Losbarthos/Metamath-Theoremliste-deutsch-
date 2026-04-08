@@ -1,0 +1,23 @@
+% tex/impl/commands/project.tex
+\ProvidesFile{project.tex}[2026/01/04 Project specific macros]
+
+\providecommand{\DisjFam}{\ensuremath{\mathsf{DisjFam}}}
+
+% Dedekindscher Rekursionssatz
+\DeclareRobustCommand{\AdmRec}[2]{\operatorname{Adm}_{#1,#2}}
+\DeclareRobustCommand{\RecCore}[2]{\Gamma_{#1,#2}}
+
+\DeclareRobustCommand{\AdmRec}[2]{\operatorname{Adm}_{#1,#2}}
+\DeclareRobustCommand{\RecCore}[2]{\Gamma_{#1,#2}}
+
+\makeatletter
+\def\TarskiFinite{%
+  \@ifnextchar({\TarskiFinite@args}{\TarskiFinite@name}%
+}
+\def\TarskiFinite@name{%
+  \ensuremath{\mathsf{TarskiFinite}}%
+}
+\def\TarskiFinite@args(#1){%
+  \ensuremath{\mathsf{TarskiFinite}\!\left(#1\right)}%
+}
+\makeatother

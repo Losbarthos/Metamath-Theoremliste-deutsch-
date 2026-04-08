@@ -1,0 +1,61 @@
+% tex/impl/commands/functions.tex
+\ProvidesFile{functions.tex}[2026/01/04 Function-theoretic notation]
+
+% ------------------------------------------------------------
+% Pfeile für Abbildungen
+% ------------------------------------------------------------
+\providecommand{\inj}{\rightarrowtail}           % injektiv
+\providecommand{\sur}{\twoheadrightarrow}        % surjektiv
+\providecommand{\bij}{\xrightarrow{\sim}}        % bijektiv
+
+% ------------------------------------------------------------
+% Standard-Namen / Operatoren
+% ------------------------------------------------------------
+\providecommand{\Id}{\mathrm{id}}                % Identitäts-Operator (z.B. \Id_A)
+\providecommand{\Graph}{\ensuremath{\mathrm{Graph}}}
+
+% Induzierte Potenzmengenabbildung
+\DeclareRobustCommand{\PowMap}[1]{\mathcal{P}_{#1}}
+\DeclareRobustCommand{\tPowMap}[1]{t_{\PowMap{#1}}}
+
+% ------------------------------------------------------------
+% Projekt-spezifische Operatoren (als MathOperator wie bei dir)
+% ------------------------------------------------------------
+\DeclareMathOperator{\Ausw}{Ausw}                % Auswahlmenge/Operator
+\DeclareMathOperator{\Fib}{Fib}                  % Faser (Operator)
+\DeclareMathOperator{\FibFam}{FibFam}            % Faserfamilie (falls genutzt)
+\DeclareMathOperator{\Sec}{Sec}                  % Sektion / Rechtsinverse (z.B. \Sec_{G,L})
+
+% ------------------------------------------------------------
+% Graph einer Surjektion aus einer Injektion (mit Stützelement a_0)
+% ------------------------------------------------------------
+\DeclareRobustCommand{\Gsurjfrominj}[2]{G_{#1,#2}}
+
+% commands/functions.tex
+\DeclareMathOperator{\Succ}{succ} 
+\DeclareMathOperator{\Pred}{pred}
+
+\DeclareRobustCommand{\Jomit}[1]{J_{#1}}
+\DeclareRobustCommand{\tJomit}[1]{t_{J_{#1}}}
+
+\DeclareRobustCommand{\Back}[1]{B_{#1}}
+\DeclareRobustCommand{\tBack}[1]{t_{\Back{#1}}}
+
+\DeclareMathOperator{\Ext}{Ext}
+
+\newcommand{\tExtMap}[3]{t_{\Ext_{#1,#2,#3}}}
+\newcommand{\ExtMap}[3]{\Ext_{#1,#2,#3}}
+
+% (OrbMap hast du schon)
+\NewDocumentCommand{\OrbMap}{mm}{\mathrm{Orb}_{#1,#2}}
+
+% Term-Symbol zur Orbit-Abbildung
+\DeclareRobustCommand{\tOrbMap}[2]{t_{\OrbMap{#1}{#2}}}
+
+% Potenzmengenadjunktion natürlicher Zahlen
+\DeclareRobustCommand{\PowAdj}[1]{S^{\mathcal P}_{#1}}
+\DeclareRobustCommand{\tPowAdj}[1]{t_{\PowAdj{#1}}}
+
+\DeclareRobustCommand{\ZeroFix}[1]{Z_{#1}}
+
+\DeclareRobustCommand{\RecFun}[2]{\mathrm{Rec}_{#1,#2}}

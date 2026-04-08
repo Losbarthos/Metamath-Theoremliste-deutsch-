@@ -1,0 +1,368 @@
+% tex/impl/proof-tables.tex
+\RequirePackage{xparse}
+\RequirePackage{array}
+\RequirePackage{longtable}
+\RequirePackage{amsthm} % für proof-Umgebung / qed
+
+\providecommand{\axstrut}{\rule{0pt}{1.25\baselineskip}}
+\providecommand{\axsep}{1pt}
+
+% Spaltentyp für eingerückte Abhängigkeitslisten
+\newcolumntype{G}{>{\raggedright\arraybackslash}l}
+
+
+\newcounter{proofstepnr}
+
+% ------------------------------------------------------------
+% Induktions-Teile mit Referenz (thmlookup)
+% Nummerierung: <aktuelles Theorem>(i), (ii), ...
+% ------------------------------------------------------------
+
+\newcounter{proofpartnr}
+
+% Standard: an aktuelles Theorem koppeln
+\providecommand{\mxProofPartParent}{\theformulaThm}
+\NewDocumentCommand{\ProofPartSetParent}{m}{%
+  \def\mxProofPartParent{#1}%
+}
+
+\renewcommand{\theproofpartnr}{\mxProofPartParent(\roman{proofpartnr})}
+
+% interner Helfer: Teil registrieren + Header drucken
+% Signatur wie \FormulaThmAuto: [Titel]{Anzeigeformel}[Keyformel][ID]
+\NewDocumentCommand{\mxProofPartOpen}{m o m o o}{%
+  % #1 = Tabellenpräambel, #2 = optional Titel, #3 = Formel (Anzeige), #4 = optional Key, #5 = optional ID
+
+  \par\medskip
+  \refstepcounter{proofpartnr}%
+
+  % Label (stabil/ASCII; ohne Klammern/roman im Labelnamen)
+  \edef\mxPPLbl{thm:pp:\mxProofPartParent:\arabic{proofpartnr}}%
+  \label{\mxPPLbl}%
+
+  % Key bestimmen (Default: Anzeigeformel)
+  \def\mxKey{#3}%
+  \IfNoValueF{#4}{%
+    \IfBlankTF{#4}{}{%
+      \def\mxKey{#4}%
+    }%
+  }%
+
+  % Registrierung:
+  % - Wenn ID angegeben: nur ID->Label registrieren (keine Strukturregistrierung => keine Duplikat-Key-Probleme)
+  % - Sonst: Struktur registrieren (wie bei FormulaThmAuto), Referenz dann über \FormulaRefAuto{<Keyformel/Formel>}
+  \IfNoValueTF{#5}{%
+    \IfNoValueTF{#2}
+      {\ThmLookupRegister{\mxPPLbl}{theorem}{\theproofpartnr}{\mxKey}}
+      {\ThmLookupRegister{\mxPPLbl}{theorem}{\theproofpartnr}{\mxKey}{#2}}%
+  }{%
+    \IfBlankTF{#5}{}{%
+      \ThmLookupRegisterId{#5}{theorem}{\mxPPLbl}%
+    }%
+  }%
+
+  % Header: optional Titel links, eigene Referenz rechts
+  \noindent
+  \IfNoValueTF{#2}{\textbf{Teil}}{\textbf{#2}}%
+  \hfill \ThmLookupEmitRef{theorem}{\mxPPLbl}%
+  \par
+  \[
+    #3
+  \]
+  \par\small
+
+  % Tabellen-Setup
+  \setcounter{proofstepnr}{0}%
+  \setlength{\tabcolsep}{2pt}%
+  \renewcommand{\arraystretch}{1.15}%
+  \begin{longtable}{#1}%
+}
+
+\newcommand{\mxProofPartClose}{%
+  \end{longtable}\par
+}
+
+% ------------------------------------------------------------
+% ProofParts mit Delta-Kontext (analog zu \FormulaThmDeltaR)
+% ------------------------------------------------------------
+% Signatur:
+% \mxProofPartOpenDelta{<Tabellenpräambel>}[<Titel>]{<Anzeigeformel>}{<DeltaRows>}[<Keyformel>][<ID>]
+\NewDocumentCommand{\mxProofPartOpenDelta}{m o m +G{} o o}{%
+  % #1 = Tabellenpräambel
+  % #2 = optional Titel
+  % #3 = Anzeigeformel
+  % #4 = DeltaRows (optional, default leer)
+  % #5 = optional Keyformel
+  % #6 = optional ID
+
+  \par\medskip
+  \refstepcounter{proofpartnr}%
+
+  \edef\mxPPLbl{thm:pp:\mxProofPartParent:\arabic{proofpartnr}}%
+  \label{\mxPPLbl}%
+
+  % Key bestimmen (Default: Anzeigeformel)
+  \def\mxKey{#3}%
+  \IfNoValueF{#5}{%
+    \IfBlankTF{#5}{}{%
+      \def\mxKey{#5}%
+    }%
+  }%
+
+  % Registrierung (wie bei \mxProofPartOpen)
+  \IfNoValueTF{#6}{%
+    \IfNoValueTF{#2}
+      {\ThmLookupRegister{\mxPPLbl}{theorem}{\theproofpartnr}{\mxKey}}
+      {\ThmLookupRegister{\mxPPLbl}{theorem}{\theproofpartnr}{\mxKey}{#2}}%
+  }{%
+    \IfBlankTF{#6}{}{%
+      \ThmLookupRegisterId{#6}{theorem}{\mxPPLbl}%
+    }%
+  }%
+
+  % Header
+  \noindent
+  \IfNoValueTF{#2}{\textbf{Teil}}{\textbf{#2}}%
+  \hfill \ThmLookupEmitRef{theorem}{\mxPPLbl}%
+  \par
+
+  % Delta-Block (analog \FormulaThmDeltaR: leerer Titel)
+  \IfBlankTF{#4}{}{%
+    \begin{DeltaContext}{ }%
+      #4%
+    \end{DeltaContext}%
+  }%
+
+  % Anzeigeformel
+  \[
+    #3
+  \]
+  \par\small
+
+  % Tabellen-Setup
+  \setcounter{proofstepnr}{0}%
+  \setlength{\tabcolsep}{2pt}%
+  \renewcommand{\arraystretch}{1.15}%
+  \begin{longtable}{#1}%
+}
+
+% ----- Public API: Induktions-Parts (normal / wide) -----
+
+% \proofpartindDelta[<Titel>]{<Formel>}{<DeltaRows>}[<Keyformel>][<ID>]
+\NewDocumentCommand{\proofpartindDelta}{o m +G{} o o}{%
+  \mxProofPartOpenDelta{@{}G r >{$}l<{$} >{$}l<{$}@{}}[#1]{#2}{#3}[#4][#5]%
+}
+\newcommand{\closeproofpartindDelta}{\mxProofPartClose}
+
+% \proofpartwideindDelta[<Titel>]{<Formel>}{<DeltaRows>}[<Keyformel>][<ID>]
+\NewDocumentCommand{\proofpartwideindDelta}{o m +G{} o o}{%
+  \mxProofPartOpenDelta{@{}G r >{$}r<{$} >{$}c<{$} >{$}l<{$} @{\hfill} l@{}}[#1]{#2}{#3}[#4][#5]%
+}
+\newcommand{\closeproofpartwideindDelta}{\mxProofPartClose}
+
+% Optional: "DeltaR"-ähnlicher Komfort-Wrapper (Key fest als 3. Argument)
+% \proofpartindDeltaR[<Titel>]{<Formel>}{<Key>}{<DeltaRows>}
+\NewDocumentCommand{\proofpartindDeltaR}{o m m +m}{%
+  \proofpartindDelta[#1]{#2}{#4}[#3]%
+}
+\newcommand{\closeproofpartindDeltaR}{\closeproofpartindDelta}
+
+% \proofpartwideindDeltaR[<Titel>]{<Formel>}{<Key>}{<DeltaRows>}
+\NewDocumentCommand{\proofpartwideindDeltaR}{o m m +m}{%
+  \proofpartwideindDelta[#1]{#2}{#4}[#3]%
+}
+\newcommand{\closeproofpartwideindDeltaR}{\closeproofpartwideindDelta}
+
+
+% ----- Public API: normal / wide -----
+
+% \proofpartind[<Titel>]{<Formel>}[<Keyformel>][<ID>]
+\NewDocumentCommand{\proofpartind}{o m o o}{%
+  \mxProofPartOpen{@{}G r >{$}l<{$} >{$}l<{$}@{}}[#1]{#2}[#3][#4]%
+}
+\newcommand{\closeproofpartind}{\mxProofPartClose}
+
+% \proofpartwideind[<Titel>]{<Formel>}[<Keyformel>][<ID>]
+\NewDocumentCommand{\proofpartwideind}{o m o o}{%
+  \mxProofPartOpen{@{}G r >{$}r<{$} >{$}c<{$} >{$}l<{$} @{\hfill} l@{}}[#1]{#2}[#3][#4]%
+}
+\newcommand{\closeproofpartwideind}{\mxProofPartClose}
+
+% ------------------------------------------------------------
+% Public API: normal / wide (Anzeigeformel darf mehrzeilig sein)
+% ------------------------------------------------------------
+
+% \proofpartind[<Titel>]{<Anzeigeformel>}[<Keyformel>][<ID>]
+\RenewDocumentCommand{\proofpartind}{o +m o o}{%
+  \mxProofPartOpen{@{}G r >{$}l<{$} >{$}l<{$}@{}}[#1]{#2}[#3][#4]%
+}
+\renewcommand{\closeproofpartind}{\mxProofPartClose}
+
+% \proofpartwideind[<Titel>]{<Anzeigeformel>}[<Keyformel>][<ID>]
+\RenewDocumentCommand{\proofpartwideind}{o +m o o}{%
+  \mxProofPartOpen{@{}G r >{$}r<{$} >{$}c<{$} >{$}l<{$} @{\hfill} l@{}}[#1]{#2}[#3][#4]%
+}
+\renewcommand{\closeproofpartwideind}{\mxProofPartClose}
+
+% ------------------------------------------------------------
+% R-Varianten:
+% Anzeigeformel und Keyformel getrennt, analog zu Formula...DeltaR
+% ------------------------------------------------------------
+
+% \proofpartindR[<Titel>]{<Anzeigeformel>}{<Keyformel>}[<ID>]
+\NewDocumentCommand{\proofpartindR}{o +m m o}{%
+  \proofpartind[#1]{#2}[#3][#4]%
+}
+\newcommand{\closeproofpartindR}{\closeproofpartind}
+
+% \proofpartwideindR[<Titel>]{<Anzeigeformel>}{<Keyformel>}[<ID>]
+\NewDocumentCommand{\proofpartwideindR}{o +m m o}{%
+  \proofpartwideind[#1]{#2}[#3][#4]%
+}
+\newcommand{\closeproofpartwideindR}{\closeproofpartwideind}
+
+
+\newenvironment{tabproof}
+  {\par\small
+   \setcounter{proofstepnr}{0}%
+   \setlength{\tabcolsep}{2pt}%
+   \renewcommand{\arraystretch}{1.15}%
+   \begin{longtable}{@{}G r >{$}l<{$} >{$}l<{$}@{}}}
+  {\end{longtable}\par}
+
+
+% ------------------------------------------------------------
+% Split-Variante wie in der alten main.tex:
+% tabproofsplit = nur proof-Wrapper
+% \proofpart öffnet je Teil eine eigene longtable
+% \closeproofpart schließt sie wieder
+% ------------------------------------------------------------
+
+\newenvironment{tabproofsplit}
+  {\begin{proof}\leavevmode\par\nobreak
+   \setcounter{proofpartnr}{0}%
+   \ProofPartSetParent{\theformulaThm}%
+  }
+  {\end{proof}}
+
+
+\newcommand{\proofpart}[1]{%
+  \par\medskip\noindent #1:\par%
+  \par\small
+  \setcounter{proofstepnr}{0}%
+  \setlength{\tabcolsep}{2pt}%
+  \renewcommand{\arraystretch}{1.15}%
+  \begin{longtable}{@{}G r >{$}l<{$} >{$}l<{$}@{}}
+}
+
+\newcommand{\closeproofpart}{%
+  \end{longtable}\par
+}
+
+% -------------------- WIDE (analog) --------------------
+
+\NewDocumentEnvironment{tabproofsplitwide}{}{% BEGIN
+  \begin{proof}\leavevmode\par\nobreak
+  \setcounter{proofpartnr}{0}%
+  \ProofPartSetParent{\theformulaThm}%
+}{% END
+  \end{proof}
+}
+
+
+\newcommand{\proofpartwide}[1]{%
+  \par\medskip\noindent #1:\par%
+  \par\small
+  \setcounter{proofstepnr}{0}%
+  \setlength{\tabcolsep}{2pt}%
+  \renewcommand{\arraystretch}{1.15}%
+  \begin{longtable}{@{}G r >{$}r<{$} >{$}c<{$} >{$}l<{$} @{\hfill} l@{}}
+
+
+}
+
+\newcommand{\closeproofpartwide}{%
+  \end{longtable}\par
+}
+
+% Alias: falls du irgendwo noch tabproofwidesplit verwendest
+\NewDocumentEnvironment{tabproofwidesplit}{}{% BEGIN
+  \begin{tabproofsplitwide}
+}{% END
+  \end{tabproofsplitwide}
+}
+
+
+
+% tex/impl/proof-tables.tex
+
+% Wide: (Deps) | Nr | Links | Rel | Rechts | Begründung
+\NewDocumentEnvironment{tabproofwide}{}{%
+  \par\small
+  \setcounter{proofstepnr}{0}%
+  \setlength{\tabcolsep}{2pt}%
+  \renewcommand{\arraystretch}{1.15}%
+  \begin{longtable}{@{}G r >{$}r<{$} >{$}c<{$} >{$}l<{$} @{\hfill} l@{}}
+
+}{%
+  \end{longtable}\par
+}
+
+% \proofstepwide[<deps>]{<links>}{<rel>}{<rechts>}{<begruendung>}
+% Sternform: keine neue Schritt-Nr. (Fortsetzungszeile)
+\NewDocumentCommand{\proofstepwide}{s O{} m m m m}{%
+  \IfBooleanTF{#1}
+    {#2 &  & #3 & #4 & #5 & #6\\}%
+    {\stepcounter{proofstepnr}%
+     #2 & \theproofstepnr & #3 & #4 & #5 & #6\\}%
+}
+
+% Zeile nur "Formel + Begründung" (wie bei dir: \proofstepwidestar[1]{A\subseteq C}{\rA})
+\ProvideDocumentCommand{\proofstepwidestar}{O{} m m}{%
+  \stepcounter{proofstepnr}%
+  #1 & \theproofstepnr & #2 &  &  & #3\\%
+}
+
+\RenewDocumentCommand{\proofstepwidestar}{O{} m m}{%
+  \stepcounter{proofstepnr}%
+  #1 & \theproofstepnr
+     & \multicolumn{3}{@{}>{$}l<{$}@{}}{#2}
+     & #3\\%
+}
+
+
+
+
+% Proofzeilen
+\NewDocumentCommand{\proofstep}{m m m}{%
+  \stepcounter{proofstepnr}%
+  #1 & \theproofstepnr & #2 & \ensuremath{#3}\\%
+}
+
+
+
+% wie \proofstep, aber ohne Schritt-Nummer (für Folgezeilen, Umbrüche, etc.)
+\ProvideDocumentCommand{\proofstepstar}{m m m}{%
+  #1 &  & #2 & #3\\%
+}
+\ProvideDocumentCommand{\proofstepstarwide}{m m m}{%
+  #1 &  & #2 & #3\\%
+}
+
+
+% Axiom-/Theorem-Referenzzeilen (nutzt FormulaRefAuto)
+\NewDocumentCommand{\proofaxline}{m m o}{%
+  \stepcounter{proofstepnr}%
+  #1 & \theproofstepnr & #2 &
+  \axstrut \FormulaRefAuto{#2}[ax]%
+  \IfNoValueF{#3}{\axstrut \textnormal{\scriptsize(#3)}}\\[\axsep]
+}
+
+\newcommand{\proofcase}[2][]{%
+  & & \text{\bfseries Fall\if\relax#1\relax\else~#1\fi: } #2 & \\[-.35ex]%
+}
+\newcommand{\proofcasesummary}[2][]{%
+  & & \text{\bfseries Schluss\if\relax#1\relax\else~ Fall~#1\fi: } #2 & \\[-.35ex]%
+}
+\newcommand{\proofcaserule}{\cline{3-4}\noalign{\vspace{-0.3ex}}}
+

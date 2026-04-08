@@ -1,0 +1,292 @@
+\RequirePackage{amsthm}
+\RequirePackage{amsmath}
+\RequirePackage{xparse}
+\RequirePackage{expl3}
+\RequirePackage{longtable}
+
+% ------------------------------------------------------------
+% Formelregister
+% ------------------------------------------------------------
+\DeclareRobustCommand{\ShowFormulaSource}[1]{%
+  \ifmmode
+    \text{\normalfont\ttfamily\footnotesize\detokenize{#1}}%
+  \else
+    {\normalfont\ttfamily\footnotesize\detokenize{#1}}%
+  \fi
+}
+
+\ExplSyntaxOn
+\seq_new:N \g_mx_formula_stack_seq
+
+% Stack-Eintrag: {env}{label}{formula}{id}
+\cs_set_protected:Npn \mx_push_formula:nnnn #1#2#3#4
+  {
+    \tl_set:Nx \l_tmpa_tl {#2}
+    \tl_set:Nn \l_tmpb_tl {#3}
+    \tl_set:Nn \l_tmpc_tl {#4}
+    \seq_gput_right:Nx \g_mx_formula_stack_seq
+      {
+        {\exp_not:n{#1}}
+        {\exp_not:V \l_tmpa_tl}
+        {\exp_not:V \l_tmpb_tl}
+        {\exp_not:V \l_tmpc_tl}
+      }
+  }
+
+\NewDocumentCommand{\MxPushFormula}{m m m o}
+  {
+    \IfNoValueTF{#4}
+      { \mx_push_formula:nnnn {#1}{#2}{#3} {} }
+      { \mx_push_formula:nnnn {#1}{#2}{#3} {#4} }
+  }
+
+\NewDocumentCommand{\MxFormulaStackIdRef}{m m m}{%
+  \IfBlankTF{#3}
+    {\ThmLookupEmitRef{#1}{#2}}
+    {\hyperref[#2]{\ShowFormulaSource{#3}}}%
+}
+
+\cs_new_protected:Npn \mx_print_formula_item_aux:nnnn #1#2#3#4
+  { \ensuremath{\displaystyle #3} & \MxFormulaStackIdRef{#1}{#2}{#4} \\ }
+\cs_new_protected:Npn \mx_print_formula_item:n #1
+  { \mx_print_formula_item_aux:nnnn #1 }
+
+\cs_new_protected:Npn \mx_print_formula_item_src_aux:nnnn #1#2#3#4
+  { \ensuremath{\displaystyle #3} & \ShowFormulaSource{#3} \\ }
+\cs_new_protected:Npn \mx_print_formula_item_src:n #1
+  { \mx_print_formula_item_src_aux:nnnn #1 }
+
+\cs_new_protected:Npn \mx_print_formula_plain_aux:nnnn #1#2#3#4
+  { \ShowFormulaSource{#3}\\ }
+\cs_new_protected:Npn \mx_print_formula_plain:n #1
+  { \mx_print_formula_plain_aux:nnnn #1 }
+
+\cs_new_protected:Npn \mx_print_formula_item_src_ref_aux:nnnn #1#2#3#4
+  { \ShowFormulaSource{#3} & \MxFormulaStackIdRef{#1}{#2}{#4} \\ }
+\cs_new_protected:Npn \mx_print_formula_item_src_ref:n #1
+  { \mx_print_formula_item_src_ref_aux:nnnn #1 }
+
+\NewDocumentCommand{\ClearFormulaStack}{}{
+  \seq_gclear:N \g_mx_formula_stack_seq
+}
+
+\NewDocumentCommand{\PrintFormulaStack}{}{
+  \seq_if_empty:NF \g_mx_formula_stack_seq
+    {
+      \chapter*{Formelregister}%
+      \begin{longtable}{@{}p{0.75\linewidth}@{\qquad}l@{}}
+        \seq_map_inline:Nn \g_mx_formula_stack_seq
+          { \mx_print_formula_item:n {##1} }
+      \end{longtable}
+    }
+}
+
+\newcounter{mxFormulaStackPrintNo}
+
+\cs_new_protected:Npn \mx_print_formula_item_id_ref_aux:nnnn #1#2#3#4
+  {
+    \stepcounter{mxFormulaStackPrintNo}
+    \arabic{mxFormulaStackPrintNo} &
+    \ensuremath{\displaystyle #3} &
+    \MxFormulaStackIdRef{#1}{#2}{#4} \\
+  }
+\cs_new_protected:Npn \mx_print_formula_item_id_ref:n #1
+  { \mx_print_formula_item_id_ref_aux:nnnn #1 }
+
+\NewDocumentCommand{\PrintFormulaStackById}{}{
+  \seq_if_empty:NF \g_mx_formula_stack_seq
+    {
+      \setcounter{mxFormulaStackPrintNo}{0}
+      \chapter*{Formelregister}%
+      \begin{longtable}{@{}r@{\qquad}p{0.56\linewidth}@{\qquad}p{0.24\linewidth}@{}}
+        \seq_map_inline:Nn \g_mx_formula_stack_seq
+          { \mx_print_formula_item_id_ref:n {##1} }
+      \end{longtable}
+    }
+}
+
+\NewDocumentCommand{\PrintFormulaStackSources}{}{
+  \seq_if_empty:NF \g_mx_formula_stack_seq
+    {
+      \chapter*{Formelregister (mit Quelltext)}%
+      \begin{longtable}{@{}p{0.45\linewidth}@{\qquad}p{0.48\linewidth}@{}}
+        \seq_map_inline:Nn \g_mx_formula_stack_seq
+          { \mx_print_formula_item_src:n {##1} }
+      \end{longtable}
+    }
+}
+
+\NewDocumentCommand{\PrintFormulaStackSourcesPlain}{}{
+  \seq_if_empty:NF \g_mx_formula_stack_seq
+    {
+      \chapter*{Formelregister (Quelltext)}%
+      \begin{longtable}{@{}p{\linewidth}@{}}
+        \seq_map_inline:Nn \g_mx_formula_stack_seq
+          { \mx_print_formula_plain:n {##1} }
+      \end{longtable}
+    }
+}
+
+\NewDocumentCommand{\PrintFormulaStackSourcesPlainWithType}{}{
+  \seq_if_empty:NF \g_mx_formula_stack_seq
+    {
+      \chapter*{Formelregister (Quelltext mit Referenz)}%
+      \begin{longtable}{@{}p{0.75\linewidth}@{\qquad}l@{}}
+        \seq_map_inline:Nn \g_mx_formula_stack_seq
+          { \mx_print_formula_item_src_ref:n {##1} }
+      \end{longtable}
+    }
+}
+\ExplSyntaxOff
+
+% ------------------------------------------------------------
+% Remark / Hint / Example
+% ------------------------------------------------------------
+\theoremstyle{remark}
+\newtheorem*{remark}{Bemerkung}
+\newtheorem*{hint}{Hinweis}
+\newtheorem*{example}{Beispiel}
+\newtheorem*{notation*}{Notation}
+
+% ------------------------------------------------------------
+% Theorem-Stil
+% ------------------------------------------------------------
+\makeatletter
+\newtheoremstyle{mxformula}%
+  {3pt}%
+  {3pt}%
+  {\itshape}%
+  {0pt}%
+  {\bfseries}%
+  {.}%
+  {\newline}%
+  {\thmname{#1}\thmnumber{ #2}\thmnote{ (#3)}}%
+\makeatother
+
+\theoremstyle{mxformula}
+\newtheorem{formulaThm}{Theorem}
+\newtheorem{formulaDef}[formulaThm]{Definition}
+\newtheorem{formulaAx}[formulaThm]{Axiom}
+
+\theoremstyle{definition}
+\newtheorem{definition}[formulaThm]{Definition}
+
+\theoremstyle{plain}
+\newtheorem{theorem}[formulaThm]{Theorem}
+
+\theoremstyle{definition}
+\newtheorem{axiom}[formulaThm]{Axiom}
+
+% ------------------------------------------------------------
+% Nummerierung
+% ------------------------------------------------------------
+\providecommand{\FormulaBandID}{0}
+\renewcommand{\theformulaThm}{\arabic{formulaThm}}
+
+% ------------------------------------------------------------
+% Anzeigeformel mit ID rechts
+% ------------------------------------------------------------
+\NewDocumentCommand{\MxDisplayFormulaWithId}{m m}{%
+  \begin{equation*}
+    #1
+    \tag*{(\ShowFormulaSource{#2})}
+  \end{equation*}%
+}
+
+% ------------------------------------------------------------
+% Einzige öffentliche Makros
+% Signatur: \FormulaThm[<Titel>]{<Formel>}{<ID>}{<Delta-Zeilen>}
+%           \FormulaDef[<Titel>]{<Formel>}{<ID>}{<Delta-Zeilen>}
+%           \FormulaAxiom[<Titel>]{<Formel>}{<ID>}{<Delta-Zeilen>}
+% Der letzte Block darf leer sein: {}
+% ------------------------------------------------------------
+\NewDocumentCommand{\FormulaThm}{o +m m +m}{%
+  \IfNoValueTF{#1}
+    {\begin{formulaThm}}
+    {\begin{formulaThm}[#1]}%
+  \edef\mxLbl{mx:theorem:#3}%
+  \phantomsection\label{\mxLbl}%
+  \IfNoValueTF{#1}
+    {\ThmLookupRegister{\mxLbl}{theorem}{\theformulaThm}{#2}}
+    {\ThmLookupRegister{\mxLbl}{theorem}{\theformulaThm}{#2}{#1}}%
+  \ThmLookupRegisterId{#3}{theorem}{\mxLbl}%
+  \MxPushFormula{theorem}{\mxLbl}{#2}[#3]%
+  \IfBlankTF{#4}{}{\DeltaBlockFromRows{#4}}%
+  \MxDisplayFormulaWithId{#2}{#3}%
+  \end{formulaThm}%
+}
+
+\NewDocumentCommand{\FormulaDef}{o +m m +m}{%
+  \IfNoValueTF{#1}
+    {\begin{formulaDef}}
+    {\begin{formulaDef}[#1]}%
+  \edef\mxLbl{mx:definition:#3}%
+  \phantomsection\label{\mxLbl}%
+  \IfNoValueTF{#1}
+    {\ThmLookupRegister{\mxLbl}{definition}{\theformulaDef}{#2}}
+    {\ThmLookupRegister{\mxLbl}{definition}{\theformulaDef}{#2}{#1}}%
+  \ThmLookupRegisterId{#3}{definition}{\mxLbl}%
+  \MxPushFormula{definition}{\mxLbl}{#2}[#3]%
+  \IfBlankTF{#4}{}{\DeltaBlockFromRows{#4}}%
+  \MxDisplayFormulaWithId{#2}{#3}%
+  \end{formulaDef}%
+}
+
+\NewDocumentCommand{\FormulaAxiom}{o +m m +m}{%
+  \IfNoValueTF{#1}
+    {\begin{formulaAx}}
+    {\begin{formulaAx}[#1]}%
+  \edef\mxLbl{mx:axiom:#3}%
+  \phantomsection\label{\mxLbl}%
+  \IfNoValueTF{#1}
+    {\ThmLookupRegister{\mxLbl}{axiom}{\theformulaAx}{#2}}
+    {\ThmLookupRegister{\mxLbl}{axiom}{\theformulaAx}{#2}{#1}}%
+  \ThmLookupRegisterId{#3}{axiom}{\mxLbl}%
+  \MxPushFormula{axiom}{\mxLbl}{#2}[#3]%
+  \IfBlankTF{#4}{}{\DeltaBlockFromRows{#4}}%
+  \MxDisplayFormulaWithId{#2}{#3}%
+  \end{formulaAx}%
+}
+
+% ------------------------------------------------------------
+% Referenzen: ID zuerst, Struktur nur als Fallback
+% ------------------------------------------------------------
+\ExplSyntaxOn
+\cs_new:Npn \mx_formula_ref_suffix:n #1
+  {
+    \IfNoValueF{#1}
+      { \tl_if_blank:nF {#1} { (#1) } }
+  }
+\ExplSyntaxOff
+
+\NewDocumentCommand{\MxRefById}{m}{%
+  \ThmRefById{#1}%
+}
+
+\ExplSyntaxOn
+\NewDocumentCommand{\FormulaRefAuto}{s O{} m o g}{%
+  \tl_set:Nn \l_tmpa_tl {#2}
+
+  \IfNoValueF{#4}{
+    \str_case:nn {#4}{
+      {ax}  { \tl_put_right:Nn \l_tmpa_tl { env=axiom } }
+      {def} { \tl_put_right:Nn \l_tmpa_tl { env=definition } }
+      {thm} { \tl_put_right:Nn \l_tmpa_tl { env=theorem } }
+    }{}
+  }
+
+  \regex_match:nnTF { \A [A-Za-z0-9:._\-]+ \Z } {#3}
+    {
+      \ThmRefById{#3}
+    }
+    {
+      \IfBooleanTF{#1}
+        { \ThmRefByStructure*[\tl_use:N \l_tmpa_tl]{#3} }
+        { \ThmRefByStructure [\tl_use:N \l_tmpa_tl]{#3} }
+    }
+
+  \mx_formula_ref_suffix:n {#5}
+}
+\ExplSyntaxOff
+
+\input{tex/impl/delta-context.tex}

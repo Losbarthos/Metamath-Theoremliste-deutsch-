@@ -1,0 +1,101 @@
+% tex/impl/commands/rules.tex
+\ProvidesFile{rules.tex}[2026/01/04 ND rule macros]
+
+% Erwartung:
+% - hyperref ist bereits geladen (in der Preambel, nicht hier)
+% - Labels heißen: rule:<NAME>  (z.B. rule:AI, rule:RE, ...)
+
+% ------------------------------------------------------------
+% Zentrales Helfer-Makro: erzeugt den klickbaren Regelnamen
+% ------------------------------------------------------------
+\providecommand{\RuleRef}[2]{%
+  \hyperref[rule:#1]{\ensuremath{#2}}%
+}
+
+% ------------------------------------------------------------
+% Annahme
+% ------------------------------------------------------------
+\providecommand{\rA}{\RuleRef{A}{A}}
+
+% ------------------------------------------------------------
+% Konjunktion ∧
+% ------------------------------------------------------------
+\providecommand{\rAI}[1]{\RuleRef{AI}{\land I(#1)}}
+\providecommand{\rAEa}[1]{\RuleRef{AE1}{\land E1(#1)}}
+\providecommand{\rAEb}[1]{\RuleRef{AE2}{\land E2(#1)}}
+\providecommand{\rAEn}[1]{\RuleRef{AEn}{\land E(#1)}}
+
+% ------------------------------------------------------------
+% Disjunktion ∨
+% ------------------------------------------------------------
+\providecommand{\rOIa}[1]{\RuleRef{OI1}{\lor I1(#1)}}
+\providecommand{\rOIb}[1]{\RuleRef{OI2}{\lor I2(#1)}}
+\providecommand{\rOE}[1]{\RuleRef{OE}{\lor E(#1)}}
+\providecommand{\rOEn}[1]{\RuleRef{OEn}{\lor E(#1)}}
+
+% ------------------------------------------------------------
+% Implikation →
+% ------------------------------------------------------------
+\providecommand{\rRI}[1]{\RuleRef{RI}{\rightarrow I(#1)}}
+\providecommand{\rRE}[1]{\RuleRef{RE}{\rightarrow E(#1)}}
+
+% ------------------------------------------------------------
+% Äquivalenz ↔
+% ------------------------------------------------------------
+\providecommand{\rLRI}[1]{\RuleRef{LRI}{\leftrightarrow I(#1)}}
+\providecommand{\rLREa}[1]{\RuleRef{LRE1}{\leftrightarrow E1(#1)}}
+\providecommand{\rLREb}[1]{\RuleRef{LRE2}{\leftrightarrow E2(#1)}}
+\providecommand{\rLRS}[1]{\RuleRef{LRSubst}{\leftrightarrow S(#1)}}
+
+% ------------------------------------------------------------
+% Allquantor ∀
+% ------------------------------------------------------------
+\providecommand{\rUI}[1]{\RuleRef{UI}{\forall I(#1)}}
+\providecommand{\rUE}[1]{\RuleRef{UE}{\forall E(#1)}}
+
+% ------------------------------------------------------------
+% Existenzquantor ∃
+% ------------------------------------------------------------
+\providecommand{\rEI}[1]{\RuleRef{EI}{\exists I(#1)}}
+\providecommand{\rEE}[1]{\RuleRef{EE}{\exists E(#1)}}
+
+% ------------------------------------------------------------
+% Eindeutige Existenz ∃!
+% (Du nutzt aktuell \UEI/\UEE ohne führendes r — ich lasse das so,
+% und gebe zusätzlich optionale Aliasse \rUEI/\rUEE.
+% ------------------------------------------------------------
+\providecommand{\UEI}[1]{\RuleRef{UEI}{\exists! I(#1)}}
+\providecommand{\UEE}[1]{\RuleRef{UEE}{\exists! E(#1)}}
+
+\providecommand{\rUEI}[1]{\UEI{#1}}
+\providecommand{\rUEE}[1]{\UEE{#1}}
+
+% ------------------------------------------------------------
+% Gleichheit =
+% ------------------------------------------------------------
+\providecommand{\rII}{\RuleRef{II}{=I}}
+\providecommand{\rIE}[1]{\RuleRef{IE}{=E(#1)}}
+
+% Falls du wirklich separate Labels rule:rIIb / rule:rIEb hast:
+\providecommand{\rIIb}[1]{\RuleRef{rIIb}{=I(#1)}}
+\providecommand{\rIEb}[1]{\RuleRef{rIEb}{=E(#1)}}
+
+\providecommand{\rNeq}{\RuleRef{Neq}{\neq}}
+
+% ------------------------------------------------------------
+% Negation ¬ und ⊥
+% ------------------------------------------------------------
+\providecommand{\rBI}[1]{\RuleRef{BI}{\bot I(#1)}}
+\providecommand{\rCI}[1]{\RuleRef{CI}{\neg I(#1)}}
+\providecommand{\rCE}[1]{\RuleRef{CE}{\neg E(#1)}}
+\providecommand{\rDN}[1]{\RuleRef{DN}{DN(#1)}}
+
+% ------------------------------------------------------------
+% Kettennotation / Transitivitätsschritt
+% ------------------------------------------------------------
+\providecommand{\rChain}[1]{\RuleRef{Chain}{\mathsf{Tr.}(#1)}}
+
+% ------------------------------------------------------------
+% Induktion (falls du das als "Regel" klickbar willst)
+% ------------------------------------------------------------
+\providecommand{\rInduktion}[1]{\RuleRef{Induktion}{\mathrm{Induktion}(#1)}}
